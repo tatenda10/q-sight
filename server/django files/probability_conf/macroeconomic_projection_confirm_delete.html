@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="fw-bold text-danger"><i class="bi bi-exclamation-triangle me-2"></i> Confirm Deletion</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <p class="fw-bold">Are you sure you want to delete this macroeconomic projection?</p>
+
+            <ul>
+                <li><strong>Date:</strong> {{ projection.fic_mis_date }}</li>
+                <li><strong>Scenario:</strong> {{ projection.get_scenario_display }}</li>
+                <li><strong>Projection Year:</strong> {{ projection.projection_year }}</li>
+            </ul>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="text-end">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i> Delete
+                    </button>
+                    <a href="{% url 'macroeconomic_projection_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

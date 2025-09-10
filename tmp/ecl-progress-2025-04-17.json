@@ -1,0 +1,11 @@
+{
+  "date": "2025-04-17",
+  "progress": [
+    {
+      "script": "../scripts/pd/runPdInterpolation.js",
+      "step": "Running PD Interpolation",
+      "status": "Failed",
+      "output": "No term structure details found for date: 2025-04-17"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="container my-4">
+                <h2 class="fw-bold"><i class="bi bi-pencil-square me-2"></i> 
+                    {% if form.instance.pk %} Edit {% else %} Create {% endif %} Segment Group
+                </h2>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-list-check me-2"></i> Fill in the Segment Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <!-- Global Form Errors -->
+                            {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                            {% endif %}
+
+                            <!-- Segment Key -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">PD Term Structure</label>
+                                {{ form.n_segment_skey }}
+                                {% if form.n_segment_skey.errors %}
+                                    <div class="text-danger small mt-1">{{ form.n_segment_skey.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Combined Group -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Combine it under this Term Structure</label>
+                                {{ form.v_combined_group }}
+                                {% if form.v_combined_group.errors %}
+                                    <div class="text-danger small mt-1">{{ form.v_combined_group.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="text-end mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save me-1"></i> Save
+                                </button>
+                                <a href="{% url 'dim_product_segment_group_list' %}" class="btn btn-secondary ms-2">
+                                    <i class="bi bi-arrow-left me-1"></i> Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

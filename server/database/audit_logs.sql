@@ -1,0 +1,21 @@
+CREATE TABLE audit_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    action_type ENUM('CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT', 'PASSWORD_CHANGE', 'ROLE_CHANGE') NOT NULL,
+    action_description TEXT NOT NULL,
+    entity_type ENUM('USER', 'ROLE', 'PERMISSION', 'SYSTEM') NOT NULL,
+    entity_id INT,
+    old_values JSON,
+    new_values JSON,
+    ip_address VARCHAR(45),
+    user_agent VARCHAR(255),
+    status ENUM('SUCCESS', 'FAILURE') NOT NULL DEFAULT 'SUCCESS',
+    error_message TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    session_id VARCHAR(100),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_entity (entity_type, entity_id),
+    INDEX idx_action (action_type),
+    INDEX idx_created_at (created_at),
+    INDEX idx_user (user_id)
+); 

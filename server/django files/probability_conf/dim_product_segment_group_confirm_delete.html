@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+       
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="container my-4">
+                <h2 class="fw-bold text-danger"><i class="bi bi-exclamation-triangle me-2"></i> Delete Segment Group</h2>
+
+                <div class="card shadow-sm border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0"><i class="bi bi-trash-fill me-2"></i> Confirm Deletion</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="fw-bold text-center mb-3">Are you sure you want to delete this segment group?</p>
+                        <ul class="list-unstyled text-center">
+                            <li><strong>Segment Key:</strong> {{ segment_group.n_segment_skey }}</li>
+                            <li><strong>Combined Group:</strong> {{ segment_group.v_combined_group }}</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer text-end">
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash-fill me-1"></i> Yes, Delete
+                            </button>
+                        </form>
+                        <a href="{% url 'dim_product_segment_group_list' %}" class="btn btn-secondary ms-2">
+                            <i class="bi bi-x-circle me-1"></i> Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

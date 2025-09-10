@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav id="operations-sidebar" class="col-md-3 col-lg-2 d-md-block sidebar bg-dark text-white vh-100 position-fixed">
+            <div class="position-sticky pt-3 px-2">
+                <div class="mb-4 text-center">
+                    <a href="{% url 'ifrs9_scenario_weights_list' %}" class="btn btn-outline-light w-100">
+                        <i class="fas fa-arrow-left me-2"></i> Back
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-auto col-lg-10 px-md-4" style="margin-left: 250px;">
+            <div class="container my-4">
+                <h2 class="fw-bold"><i class="bi bi-pencil-square me-2"></i> Edit Scenario Weights</h2>
+
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Save Changes</button>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="fw-bold text-danger"><i class="bi bi-exclamation-triangle me-2"></i> Confirm Deletion</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <p class="fw-bold">Are you sure you want to delete this PD Sensitivity record?</p>
+
+            <ul>
+                <li><strong>PD Term Structure:</strong> {{ record.pd_term_structure }}</li>
+                <li><strong>Sensitivity Factor (β):</strong> {{ record.sensitivity_factor }}</li>
+                <li><strong>Asset Correlation (ρ):</strong> {{ record.asset_correlation }}</li>
+            </ul>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="text-end">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i> Delete
+                    </button>
+                    <a href="{% url 'ifrs9_pd_sensitivity_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

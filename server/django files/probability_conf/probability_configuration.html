@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+
+        <nav id="operations-sidebar" class="col-md-3 col-lg-2 d-md-block sidebar">
+            <div class="position-sticky pt-3 px-3">
+                <!-- Back Button -->
+                <div class="mb-4 text-center">
+                    <a href="{% url 'credit_risk_models' %}" class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-arrow-left me-2"></i> Back
+                    </a>
+                </div>
+
+                <div class="mb-4 text-center">
+                    <a href="{% url 'credit_risk_models' %}" class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-arrow-left me-2"></i> Back
+                    </a>
+                </div>
+                
+                <h5 class="sidebar-heading text-white text-uppercase mb-3">Options</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item mb-2">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'pd_modelling' %}active{% endif %} text-white" href="{% url 'pd_modelling' %}">
+                            <i class="bi bi-bar-chart me-2"></i> PD Modelling
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'segment_list' %}active{% endif %} text-white" href="{% url 'segment_list' %}">
+                            <i class="bi bi-diagram-3 me-2"></i> Define Segments
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'pd_term_structure_list' %}active{% endif %} text-white" href="{% url 'pd_term_structure_list' %}">
+                            <i class="bi bi-diagram-2 me-2"></i> PD Term Structure
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'delinquent_pd_list' %}active{% endif %} text-white" href="{% url 'delinquent_pd_list' %}">
+                            <i class="bi bi-exclamation-circle me-2"></i> Delinquent PD Term Values
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'rating_pd_list' %}active{% endif %} text-white" href="{% url 'rating_pd_list' %}">
+                            <i class="bi bi-star me-2"></i> Rating PD Term Values
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'interpolation_method_list' %}active{% endif %} text-white" href="{% url 'interpolation_method_list' %}">
+                            <i class="bi bi-tools me-2"></i> Interpolation Method
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-auto col-lg-10 px-md-4">
+            <div class="container my-4">
+                <h2 class="fw-bold"><i class="bi bi-bar-chart-line me-2"></i> Probability Configuration</h2>
+
+                <div class="row g-4">
+                    <!-- Transition Flow Rate (Bar Chart) -->
+                    <div class="col-lg-6">
+                        <div class="card custom-card h-100 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="bi bi-arrow-repeat me-2"></i> Transition Flow Rate
+                                </h5>
+                                <p class="text-muted" style="font-size: 0.95rem;">
+                                    Animated visualization of PD transition flow rates.
+                                </p>
+                                <canvas id="transitionFlowChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PD Evolution Over Time (Line Chart) -->
+                    <div class="col-lg-6">
+                        <div class="card custom-card h-100 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="bi bi-graph-up-arrow me-2"></i> PD Evolution Over Time
+                                </h5>
+                                <p class="text-muted" style="font-size: 0.95rem;">
+                                    Illustrates how PD evolves over different stages.
+                                </p>
+                                <canvas id="pdEvolutionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- /row -->
+            </div> <!-- /container -->
+        </main>
+    </div>
+</div>
+
+<!-- External CSS/JS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    /* Sidebar Styling */
+    #operations-sidebar {
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background: linear-gradient(180deg, #003366 0%, #002244 100%);
+        color: #ffffff;
+        width: 250px;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        overflow-y: auto;
+    }
+
+    #operations-sidebar .nav-link {
+        font-size: 0.95rem;
+        color: #ffffff;
+        padding: 12px 15px;
+        font-weight: 600;
+        border-left: 4px solid transparent;
+        transition: background-color 0.3s, border-left-color 0.3s, color 0.3s;
+    }
+
+    #operations-sidebar .nav-link:hover {
+        background-color: #145da0;
+        border-left-color: #ffcc00;
+        color: #ffcc00;
+    }
+
+    #operations-sidebar .nav-link.active {
+        background-color: #004080;
+        border-left-color: #ffffff;
+    }
+
+    /* Main Content */
+    main {
+        margin-left: 250px;
+        min-height: 100vh;
+        background-color: #f8f9fa;
+        padding: 20px;
+    }
+
+    .custom-card:hover {
+        transform: translateY(-2px);
+        transition: transform 0.2s ease-in;
+    }
+
+    .card-body h5 {
+        color: #333;
+    }
+
+    .card-body p {
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+<!-- Chart Initialization -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1) Transition Flow Rate (Bar Chart)
+    const flowCtx = document.getElementById('transitionFlowChart').getContext('2d');
+    new Chart(flowCtx, {
+        type: 'bar',
+        data: {
+            labels: ['S1 → S1', 'S1 → S2', 'S1 → S3', 'S2 → S1', 'S2 → S2', 'S2 → S3', 'S3 → S1', 'S3 → S2', 'S3 → S3'],
+            datasets: [{
+                label: 'Flow Rate (%)',
+                data: [85, 10, 5, 12, 80, 8, 3, 7, 90], // Sample flow rates
+                backgroundColor: 'rgba(32, 100, 168, 0.7)',
+                borderColor: '#2064a8',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            animation: {
+                duration: 1200,
+                easing: 'easeInOutQuart'
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // 2) PD Evolution Over Time (Line Chart)
+    const pdCtx = document.getElementById('pdEvolutionChart').getContext('2d');
+    new Chart(pdCtx, {
+        type: 'line',
+        data: {
+            labels: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6'],
+            datasets: [{
+                label: 'PD (%)',
+                data: [1.2, 1.5, 1.9, 2.3, 2.0, 2.5],
+                borderColor: '#0056b3',
+                backgroundColor: 'rgba(0,86,179,0.15)',
+                fill: true,
+                tension: 0.2
+            }]
+        },
+        options: {
+            responsive: true,
+            animation: {
+                duration: 1200,
+                easing: 'easeOutCubic'
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

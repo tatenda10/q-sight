@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+    <!-- Sidebar -->
+    <nav id="operations-sidebar" class="col-md-3 col-lg-2 d-md-block sidebar">
+      <div class="sidebar-content pt-3 px-3">
+          <!-- Back Button -->
+          <div class="mb-4 text-center">
+              <a href="{% url 'pd_modelling' %}" class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center">
+                  <i class="fas fa-arrow-left me-2"></i> Back
+              </a>
+          </div>
+          <div class="mb-4 text-center">
+              <a href="{% url 'pd_modelling' %}" class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center">
+                  <i class="fas fa-arrow-left me-2"></i> Back
+              </a>
+          </div>
+
+          <!-- Sidebar Heading -->
+          <h5 class="sidebar-heading text-white text-uppercase mb-3">Options</h5>
+
+          <!-- Sidebar Links -->
+          <ul class="nav flex-column">
+              <li class="nav-item mb-2">
+                  <a class="nav-link {% if request.resolver_match.url_name == 'configure_historical_dates' %}active{% endif %} text-white" 
+                     href="{% url 'historical_date_range_list' %}">
+                      <i class="bi bi-calendar-range me-2"></i> Historical Dates Range
+                  </a>
+              </li>
+              <li class="nav-item mb-2">
+                  <a class="nav-link {% if request.resolver_match.url_name == 'dim_product_segment_group_list' %}active{% endif %} text-white" 
+                     href="{% url 'dim_product_segment_group_list' %}">
+                      <i class="bi bi-graph-up me-2"></i> Combine PD Term Structure
+                  </a>
+              </li>
+              <li class="nav-item mb-2">
+                  <a class="nav-link {% if request.resolver_match.url_name == 'macroeconomic_projection_list' %}active{% endif %} text-white" 
+                     href="{% url 'macroeconomic_projection_list' %}">
+                      <i class="bi bi-star me-2"></i> Microeconomic Variables
+                  </a>
+              </li>
+              <li class="nav-item mb-2">
+                  <a class="nav-link {% if request.resolver_match.url_name == 'ifrs9_pd_sensitivity_list' %}active{% endif %} text-white" 
+                     href="{% url 'ifrs9_pd_sensitivity_list' %}">
+                      <i class="bi bi-bar-chart-line me-2"></i> Asset PD Correlation
+                  </a>
+              </li>
+              <li class="nav-item mb-2">
+                  <a class="nav-link {% if request.resolver_match.url_name == 'ifrs9_pd_sensitivity_factors_list' %}active{% endif %} text-white" 
+                     href="{% url 'ifrs9_pd_sensitivity_factors_list' %}">
+                      <i class="bi bi-bar-chart-line me-2"></i> PD Sensitivity Factors
+                  </a>
+              </li>
+              <li class="nav-item mb-2">
+                  <a class="nav-link {% if request.resolver_match.url_name == 'ifrs9_scenario_weights_list' %}active{% endif %} text-white" 
+                     href="{% url 'ifrs9_scenario_weights_list' %}">
+                      <i class="bi bi-bar-chart-line me-2"></i> Configure Scenario Weights
+                  </a>
+              </li>
+          </ul>
+      </div>
+  </nav>
+
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-auto col-lg-10 px-md-4" style="margin-left: 250px;"> <!-- Adjusted margin-left to match sidebar -->
+            <div class="container my-4">
+                <h2 class="fw-bold"><i class="bi bi-graph-up me-2"></i> IFRS 9 Assert Correlation</h2>
+
+                <a href="{% url 'ifrs9_pd_sensitivity_create' %}" class="btn btn-success mb-3">
+                    <i class="bi bi-plus-lg me-1"></i> Add New PD Assert Correlation
+                </a>
+
+                {% if messages %}
+                <div class="row">
+                    <div class="col">
+                        {% for msg in messages %}
+                        <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+                            {{ msg }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <table class="table table-hover shadow-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>PD Term Structure</th>
+                            <th>Asset Correlation (ρ)</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in page_obj %}
+                        <tr>
+                            <td>{{ record.pd_term_structure }}</td>
+                            <td>{{ record.asset_correlation }}</td>
+                            <td>{{ record.created_at }}</td>
+                            <td>
+                                <a href="{% url 'ifrs9_pd_sensitivity_edit' record.pk %}" class="btn btn-warning btn-sm">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <a href="{% url 'ifrs9_pd_sensitivity_delete' record.pk %}" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-trash"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No PD Asset Correlation records found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Styles to fix Sidebar visibility & enable scrolling -->
+<style>
+  /* Ensure Sidebar is fixed and scrollable */
+  #operations-sidebar {
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: #003366 !important;
+      color: #ffffff;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      overflow-y: auto; /* Enable scrolling */
+      overflow-x: hidden; /* Prevent horizontal overflow */
+  }
+
+  #operations-sidebar .nav-link {
+      font-size: 0.95rem;
+      color: #ffffff;
+      padding: 12px 15px;
+      font-weight: 600;
+      border-left: 4px solid transparent;
+      transition: background-color 0.3s, border-left-color 0.3s, color 0.3s;
+      border-radius: 0;
+  }
+
+  #operations-sidebar .nav-link:hover {
+      background-color: #145da0;
+      border-left-color: #ffcc00;
+      color: #ffcc00;
+  }
+
+  #operations-sidebar .nav-link.active {
+      background-color: #004080;
+      border-left-color: #ffffff;
+  }
+
+  .sidebar-heading {
+      font-size: 0.9rem;
+      color: #ffffff;
+      letter-spacing: 0.05rem;
+      font-weight: 700;
+  }
+
+  .sidebar-heading::after {
+      content: '';
+      display: block;
+      margin-top: 5px;
+      width: 50%;
+      height: 2px;
+      background-color: #ffffff;
+      opacity: 0.4;
+  }
+
+  /* Ensure the sidebar content is scrollable */
+  .sidebar-content {
+      max-height: 100vh;
+      overflow-y: auto;
+      padding-bottom: 20px;
+  }
+
+    /* Main Content */
+    main {
+        margin-left: 250px; /* Adjust to match sidebar width */
+        min-height: 100vh;
+        background-color: #f8f9fa;
+        padding: 20px;
+    }
+
+</style>
+
+{% endblock %}
