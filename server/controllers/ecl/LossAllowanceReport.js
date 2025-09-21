@@ -48,18 +48,20 @@ const getLossAllowanceReport = async (req, res) => {
         const openingBalanceQuery = `
             SELECT 
                 frl.n_curr_ifrs_stage_skey as stage,
+                frl.n_pd_term_structure_name as segment,
                 SUM(IFNULL(frl.n_12m_ecl_ncy, 0)) as amount,
                 COUNT(DISTINCT frl.n_account_number) as account_count
             FROM fct_reporting_lines frl
             WHERE frl.fic_mis_date = ? 
             AND frl.n_run_key = ?
             AND frl.n_curr_ifrs_stage_skey IN (1, 2, 3)
-            GROUP BY frl.n_curr_ifrs_stage_skey
-            ORDER BY frl.n_curr_ifrs_stage_skey;
+            GROUP BY frl.n_curr_ifrs_stage_skey, frl.n_pd_term_structure_name
+            ORDER BY frl.n_curr_ifrs_stage_skey, frl.n_pd_term_structure_name;
         `;        // Get new financial assets (accounts present in end date but not in start date)
         const newAssetsQuery = `
             SELECT 
                 e.n_curr_ifrs_stage_skey as stage,
+                e.n_pd_term_structure_name as segment,
                 SUM(e.n_12m_ecl_ncy) as amount,
                 COUNT(DISTINCT e.n_account_number) as account_count
             FROM fct_reporting_lines e
@@ -69,8 +71,8 @@ const getLossAllowanceReport = async (req, res) => {
             AND e.n_run_key = ?
             AND e.n_curr_ifrs_stage_skey IN (1, 2, 3)
             AND s.n_account_number IS NULL
-            GROUP BY e.n_curr_ifrs_stage_skey
-            ORDER BY e.n_curr_ifrs_stage_skey;
+            GROUP BY e.n_curr_ifrs_stage_skey, e.n_pd_term_structure_name
+            ORDER BY e.n_curr_ifrs_stage_skey, e.n_pd_term_structure_name;
         `;
 
         // Get stage transfer losses (movements to higher risk stages)
@@ -78,6 +80,7 @@ const getLossAllowanceReport = async (req, res) => {
             SELECT 
                 s.n_curr_ifrs_stage_skey as from_stage,
                 e.n_curr_ifrs_stage_skey as to_stage,
+                s.n_pd_term_structure_name as segment,
                 SUM(e.n_12m_ecl_ncy - s.n_12m_ecl_ncy) as amount,
                 COUNT(DISTINCT e.n_account_number) as account_count
             FROM fct_reporting_lines s
@@ -87,8 +90,8 @@ const getLossAllowanceReport = async (req, res) => {
             AND e.n_curr_ifrs_stage_skey > s.n_curr_ifrs_stage_skey
             AND s.n_curr_ifrs_stage_skey IN (1, 2)
             AND e.n_curr_ifrs_stage_skey IN (2, 3)
-            GROUP BY s.n_curr_ifrs_stage_skey, e.n_curr_ifrs_stage_skey
-            ORDER BY s.n_curr_ifrs_stage_skey, e.n_curr_ifrs_stage_skey;
+            GROUP BY s.n_curr_ifrs_stage_skey, e.n_curr_ifrs_stage_skey, s.n_pd_term_structure_name
+            ORDER BY s.n_curr_ifrs_stage_skey, e.n_curr_ifrs_stage_skey, s.n_pd_term_structure_name;
         `;
 
         // Get stage transfer gains (movements to lower risk stages)
@@ -96,6 +99,7 @@ const getLossAllowanceReport = async (req, res) => {
             SELECT 
                 s.n_curr_ifrs_stage_skey as from_stage,
                 e.n_curr_ifrs_stage_skey as to_stage,
+                s.n_pd_term_structure_name as segment,
                 SUM(e.n_12m_ecl_ncy - s.n_12m_ecl_ncy) as amount,
                 COUNT(DISTINCT e.n_account_number) as account_count
             FROM fct_reporting_lines s
@@ -105,14 +109,15 @@ const getLossAllowanceReport = async (req, res) => {
             AND e.n_curr_ifrs_stage_skey < s.n_curr_ifrs_stage_skey
             AND s.n_curr_ifrs_stage_skey IN (2, 3)
             AND e.n_curr_ifrs_stage_skey IN (1, 2)
-            GROUP BY s.n_curr_ifrs_stage_skey, e.n_curr_ifrs_stage_skey
-            ORDER BY s.n_curr_ifrs_stage_skey, e.n_curr_ifrs_stage_skey;
+            GROUP BY s.n_curr_ifrs_stage_skey, e.n_curr_ifrs_stage_skey, s.n_pd_term_structure_name
+            ORDER BY s.n_curr_ifrs_stage_skey, e.n_curr_ifrs_stage_skey, s.n_pd_term_structure_name;
         `;
 
         // Get derecognized assets (accounts present in start date but not in end date)
         const derecognizedAssetsQuery = `
             SELECT 
                 s.n_curr_ifrs_stage_skey as stage,
+                s.n_pd_term_structure_name as segment,
                 SUM(s.n_12m_ecl_ncy) as amount,
                 COUNT(DISTINCT s.n_account_number) as account_count
             FROM fct_reporting_lines s
@@ -122,28 +127,30 @@ const getLossAllowanceReport = async (req, res) => {
             AND s.n_run_key = ?
             AND s.n_curr_ifrs_stage_skey IN (1, 2, 3)
             AND e.n_account_number IS NULL
-            GROUP BY s.n_curr_ifrs_stage_skey
-            ORDER BY s.n_curr_ifrs_stage_skey;
+            GROUP BY s.n_curr_ifrs_stage_skey, s.n_pd_term_structure_name
+            ORDER BY s.n_curr_ifrs_stage_skey, s.n_pd_term_structure_name;
         `;
 
         // Get closing balances
         const closingBalanceQuery = `
             SELECT 
                 frl.n_curr_ifrs_stage_skey as stage,
+                frl.n_pd_term_structure_name as segment,
                 SUM(frl.n_12m_ecl_ncy) as amount,
                 COUNT(DISTINCT frl.n_account_number) as account_count
             FROM fct_reporting_lines frl
             WHERE frl.fic_mis_date = ? 
             AND frl.n_run_key = ?
             AND frl.n_curr_ifrs_stage_skey IN (1, 2, 3)
-            GROUP BY frl.n_curr_ifrs_stage_skey
-            ORDER BY frl.n_curr_ifrs_stage_skey;
+            GROUP BY frl.n_curr_ifrs_stage_skey, frl.n_pd_term_structure_name
+            ORDER BY frl.n_curr_ifrs_stage_skey, frl.n_pd_term_structure_name;
         `;
 
         // Get ECL increases due to credit deterioration (for accounts present in both dates)
         const eclIncreaseQuery = `
             SELECT 
                 e.n_curr_ifrs_stage_skey as stage,
+                e.n_pd_term_structure_name as segment,
                 SUM(e.n_12m_ecl_ncy - s.n_12m_ecl_ncy) as amount,
                 COUNT(DISTINCT e.n_account_number) as account_count
             FROM fct_reporting_lines s
@@ -152,14 +159,15 @@ const getLossAllowanceReport = async (req, res) => {
             AND e.fic_mis_date = ? AND e.n_run_key = ?
             AND e.n_12m_ecl_ncy > s.n_12m_ecl_ncy
             AND e.n_curr_ifrs_stage_skey IN (1, 2, 3)
-            GROUP BY e.n_curr_ifrs_stage_skey
-            ORDER BY e.n_curr_ifrs_stage_skey;
+            GROUP BY e.n_curr_ifrs_stage_skey, e.n_pd_term_structure_name
+            ORDER BY e.n_curr_ifrs_stage_skey, e.n_pd_term_structure_name;
         `;
 
         // Get ECL decreases due to credit appreciation (for accounts present in both dates)
         const eclDecreaseQuery = `
             SELECT 
                 e.n_curr_ifrs_stage_skey as stage,
+                e.n_pd_term_structure_name as segment,
                 SUM(e.n_12m_ecl_ncy - s.n_12m_ecl_ncy) as amount,
                 COUNT(DISTINCT e.n_account_number) as account_count
             FROM fct_reporting_lines s
@@ -168,8 +176,8 @@ const getLossAllowanceReport = async (req, res) => {
             AND e.fic_mis_date = ? AND e.n_run_key = ?
             AND e.n_12m_ecl_ncy < s.n_12m_ecl_ncy
             AND e.n_curr_ifrs_stage_skey IN (1, 2, 3)
-            GROUP BY e.n_curr_ifrs_stage_skey
-            ORDER BY e.n_curr_ifrs_stage_skey;
+            GROUP BY e.n_curr_ifrs_stage_skey, e.n_pd_term_structure_name
+            ORDER BY e.n_curr_ifrs_stage_skey, e.n_pd_term_structure_name;
         `;
 
         // Execute all queries in parallel for better performance
@@ -193,37 +201,35 @@ const getLossAllowanceReport = async (req, res) => {
             connection.query(eclDecreaseQuery, [startDate, startRunKey, endDate, endRunKey])
         ]);
 
-        // Log results for debugging
-        console.log('Query results:', {
-            openingBalances: openingBalances[0],
-            newAssets: newAssets[0],
-            stageTransferLosses: stageTransferLosses[0],
-            stageTransferGains: stageTransferGains[0],
-            derecognizedAssets: derecognizedAssets[0],
-            closingBalances: closingBalances[0],
-            eclIncreases: eclIncreases[0],
-            eclDecreases: eclDecreases[0]
-        });
+        // Log results for debugging (removed for production)
 
         // Process and format results
         const formatStageResults = (results) => {
             const stageMap = {
-                1: { amount: 0, account_count: 0 },
-                2: { amount: 0, account_count: 0 },
-                3: { amount: 0, account_count: 0 }
+                1: { amount: 0, account_count: 0, segments: {} },
+                2: { amount: 0, account_count: 0, segments: {} },
+                3: { amount: 0, account_count: 0, segments: {} }
             };
             
             if (Array.isArray(results[0])) {
                 results[0].forEach(row => {
                     if (row.stage && [1, 2, 3].includes(Number(row.stage))) {
-                        stageMap[row.stage] = {
-                            amount: parseFloat(row.amount) || 0,
-                            account_count: parseInt(row.account_count) || 0
-                        };
+                        const stage = row.stage;
+                        const segment = row.segment || 'Unknown';
+                        
+                        // Add to stage totals
+                        stageMap[stage].amount += parseFloat(row.amount) || 0;
+                        stageMap[stage].account_count += parseInt(row.account_count) || 0;
+                        
+                        // Add to segment breakdown
+                        if (!stageMap[stage].segments[segment]) {
+                            stageMap[stage].segments[segment] = { amount: 0, account_count: 0 };
+                        }
+                        stageMap[stage].segments[segment].amount += parseFloat(row.amount) || 0;
+                        stageMap[stage].segments[segment].account_count += parseInt(row.account_count) || 0;
                     }
                 });
             }
-            
             return stageMap;
         };
 
@@ -232,12 +238,27 @@ const getLossAllowanceReport = async (req, res) => {
                 return [];
             }
 
-            return results[0].map(row => ({
-                from_stage: parseInt(row.from_stage) || 0,
-                to_stage: parseInt(row.to_stage) || 0,
-                amount: parseFloat(row.amount) || 0,
-                account_count: parseInt(row.account_count) || 0
-            }));
+            // Aggregate transfers by from_stage and to_stage only (not by segment)
+            // This will combine all segments for the same transfer type
+            const transferMap = {};
+            
+            results[0].forEach(row => {
+                const key = `${row.from_stage}-${row.to_stage}`;
+                
+                if (!transferMap[key]) {
+                    transferMap[key] = {
+                        from_stage: parseInt(row.from_stage) || 0,
+                        to_stage: parseInt(row.to_stage) || 0,
+                        amount: 0,
+                        account_count: 0
+                    };
+                }
+                
+                transferMap[key].amount += parseFloat(row.amount) || 0;
+                transferMap[key].account_count += parseInt(row.account_count) || 0;
+            });
+
+            return Object.values(transferMap);
         };
 
         // Calculate totals for each section
@@ -248,11 +269,36 @@ const getLossAllowanceReport = async (req, res) => {
             };
         };
 
+        // Get unique segments from all data
+        const getUniqueSegments = (results) => {
+            const segments = new Set();
+            results.forEach(resultSet => {
+                if (Array.isArray(resultSet[0])) {
+                    resultSet[0].forEach(row => {
+                        if (row.segment) {
+                            segments.add(row.segment);
+                        }
+                    });
+                }
+            });
+            return Array.from(segments).sort();
+        };
+
+        // Get unique segments
+        const uniqueSegments = getUniqueSegments([
+            openingBalances, newAssets, stageTransferLosses, 
+            stageTransferGains, derecognizedAssets, 
+            eclIncreases, eclDecreases, closingBalances
+        ]);
+
         // Format final response
+        const formattedOpening = formatStageResults(openingBalances);
+        
         const response = {
+            segments: uniqueSegments,
             opening_balance: {
-                stages: formatStageResults(openingBalances),
-                total: calculateTotal(formatStageResults(openingBalances))
+                stages: formattedOpening,
+                total: calculateTotal(formattedOpening)
             },
             new_assets: {
                 stages: formatStageResults(newAssets),
@@ -266,7 +312,8 @@ const getLossAllowanceReport = async (req, res) => {
                     account_count: processTransfers(stageTransferLosses)
                         .reduce((sum, transfer) => sum + (transfer.account_count || 0), 0)
                 }
-            },            stage_transfer_gains: {
+            },
+            stage_transfer_gains: {
                 transfers: processTransfers(stageTransferGains),
                 total: {
                     amount: processTransfers(stageTransferGains)

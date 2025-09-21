@@ -2,6 +2,34 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { formatCurrency } from '../../utils/formatters';
 import API_URL from '../../utils/Api';
+import AIAnalysisPanel from '../ai/AIAnalysisPanel';
+import AIChat from '../ai/AIChat';
+import { Bar, Line, Pie } from 'react-chartjs-2';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    LineElement,
+    PointElement,
+    ArcElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
+
+// Register Chart.js components
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    LineElement,
+    PointElement,
+    ArcElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 function LossAllowanceReport() {
     const [startDate, setStartDate] = useState('');
@@ -12,6 +40,8 @@ function LossAllowanceReport() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showAccountNumbers, setShowAccountNumbers] = useState(false);
+    const [selectedSegment, setSelectedSegment] = useState('All');
+    const [viewMode, setViewMode] = useState('table'); // 'table' or 'charts'
 
     const validateDates = () => {
         if (!startDate || !endDate || !startRunKey || !endRunKey) {
@@ -28,6 +58,58 @@ function LossAllowanceReport() {
         }
 
         return true;
+    };
+
+    const filterDataBySegment = (data, segment) => {
+        if (!data || segment === 'All') return data;
+        
+        // Debugging logs removed for production
+        
+        // Deep clone the data to avoid mutating the original
+        const filteredData = JSON.parse(JSON.stringify(data));
+        
+        // Filter stage data
+        Object.keys(filteredData).forEach(key => {
+            if (filteredData[key] && filteredData[key].stages) {
+                const filteredStages = {};
+                Object.keys(filteredData[key].stages).forEach(stage => {
+                    // Check if segments exist and contain the selected segment
+                    if (filteredData[key].stages[stage].segments && 
+                        filteredData[key].stages[stage].segments[segment] &&
+                        filteredData[key].stages[stage].segments[segment].amount !== undefined) {
+                        filteredStages[stage] = {
+                            amount: filteredData[key].stages[stage].segments[segment].amount || 0,
+                            account_count: filteredData[key].stages[stage].segments[segment].account_count || 0
+                        };
+                    } else {
+                        // If no segment data or segment not found, set to zero
+                        filteredStages[stage] = { amount: 0, account_count: 0 };
+                    }
+                });
+                filteredData[key].stages = filteredStages;
+                filteredData[key].total = calculateTotal(filteredStages);
+            }
+            
+            // Filter transfer data - transfers are now aggregated by stage only, not by segment
+            // So we keep all transfers regardless of segment selection
+            if (filteredData[key] && filteredData[key].transfers) {
+                // No filtering needed for transfers since they're already aggregated
+                filteredData[key].total = {
+                    amount: filteredData[key].transfers.reduce((sum, transfer) => sum + (transfer.amount || 0), 0),
+                    account_count: filteredData[key].transfers.reduce((sum, transfer) => sum + (transfer.account_count || 0), 0)
+                };
+            }
+        });
+        
+        // Debugging logs removed for production
+        return filteredData;
+    };
+
+    const calculateTotal = (stageMap) => {
+        return {
+            amount: Object.values(stageMap).reduce((sum, stage) => sum + (stage.amount || 0), 0),
+            account_count: Object.values(stageMap).reduce((sum, stage) => sum + (stage.account_count || 0), 0)
+        };
     };
 
     const handleSearch = async () => {
@@ -67,19 +149,26 @@ function LossAllowanceReport() {
     };
 
     // Helper function to safely access nested properties
+    // Get filtered data based on selected segment
+    const getFilteredData = () => {
+        return filterDataBySegment(reportData, selectedSegment);
+    };
+
     const getStageData = (section, stage) => {
-        if (!reportData || !reportData[section] || !reportData[section].stages) {
+        const data = getFilteredData();
+        if (!data || !data[section] || !data[section].stages) {
             return { amount: 0, account_count: 0 };
         }
-        return reportData[section].stages[stage] || { amount: 0, account_count: 0 };
+        return data[section].stages[stage] || { amount: 0, account_count: 0 };
     };
 
     // Helper function to safely get total data
     const getTotalData = (section) => {
-        if (!reportData || !reportData[section] || !reportData[section].total) {
+        const data = getFilteredData();
+        if (!data || !data[section] || !data[section].total) {
             return { amount: 0, account_count: 0 };
         }
-        return reportData[section].total;
+        return data[section].total;
     };
 
     const formatNumber = (value) => {
@@ -87,6 +176,119 @@ function LossAllowanceReport() {
             return `(${formatCurrency(Math.abs(value))})`;
         }
         return formatCurrency(value);
+    };
+
+    // Chart data preparation functions
+    const getStageBalanceChartData = () => {
+        const data = getFilteredData();
+        if (!data) return null;
+
+        return {
+            labels: ['Stage 1', 'Stage 2', 'Stage 3'],
+            datasets: [
+                {
+                    label: 'Opening Balance',
+                    data: [
+                        getStageData('opening_balance', 1).amount,
+                        getStageData('opening_balance', 2).amount,
+                        getStageData('opening_balance', 3).amount
+                    ],
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Closing Balance',
+                    data: [
+                        getStageData('closing_balance', 1).amount,
+                        getStageData('closing_balance', 2).amount,
+                        getStageData('closing_balance', 3).amount
+                    ],
+                    backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    borderWidth: 1
+                }
+            ]
+        };
+    };
+
+    const getTransferChartData = () => {
+        const data = getFilteredData();
+        if (!data) return null;
+
+        const transfers = [
+            ...(data.stage_transfer_losses?.transfers || []),
+            ...(data.stage_transfer_gains?.transfers || [])
+        ];
+
+        const labels = transfers.map(transfer => 
+            `Stage ${transfer.from_stage} → Stage ${transfer.to_stage}`
+        );
+        const amounts = transfers.map(transfer => Math.abs(transfer.amount));
+        const colors = transfers.map((transfer, index) => 
+            transfer.from_stage < transfer.to_stage 
+                ? 'rgba(239, 68, 68, 0.6)' // Red for losses (higher risk)
+                : 'rgba(34, 197, 94, 0.6)'  // Green for gains (lower risk)
+        );
+
+        return {
+            labels,
+            datasets: [{
+                label: 'Transfer Amount',
+                data: amounts,
+                backgroundColor: colors,
+                borderColor: colors.map(color => color.replace('0.6', '1')),
+                borderWidth: 1
+            }]
+        };
+    };
+
+    const getECLMovementChartData = () => {
+        const data = getFilteredData();
+        if (!data) return null;
+
+        return {
+            labels: ['Opening', 'New Assets', 'Transfers', 'Derecognized', 'ECL Changes', 'Closing'],
+            datasets: [{
+                label: 'ECL Movement',
+                data: [
+                    getTotalData('opening_balance').amount,
+                    getTotalData('new_assets').amount,
+                    (getTotalData('stage_transfer_losses').amount + getTotalData('stage_transfer_gains').amount),
+                    -getTotalData('derecognized_assets').amount,
+                    (getTotalData('ecl_increases').amount - getTotalData('ecl_decreases').amount),
+                    getTotalData('closing_balance').amount
+                ],
+                backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                borderColor: 'rgba(99, 102, 241, 1)',
+                borderWidth: 1,
+                fill: false
+            }]
+        };
+    };
+
+    const getStageDistributionData = () => {
+        const data = getFilteredData();
+        if (!data) return null;
+
+        const opening = getTotalData('opening_balance').amount;
+        const closing = getTotalData('closing_balance').amount;
+
+        return {
+            labels: ['Opening Balance', 'Closing Balance'],
+            datasets: [{
+                data: [opening, closing],
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.6)',
+                    'rgba(16, 185, 129, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(16, 185, 129, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
     };
 
     const handleDownload = () => {
@@ -152,6 +354,65 @@ function LossAllowanceReport() {
 
     return (
         <div className="bg-white p-4">
+            {/* AI Chat Component */}
+            {reportData && <AIChat reportData={reportData} />}
+            
+            {/* View Controls */}
+            {reportData && (
+                <div className="flex justify-between items-center mb-4">
+                    <div className="flex space-x-2">
+                        <button
+                            onClick={() => setViewMode('table')}
+                            className={`px-3 py-1 text-xs font-medium transition-colors ${
+                                viewMode === 'table'
+                                    ? 'bg-gray-600 text-white'
+                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                        >
+                            Table View
+                        </button>
+                        <button
+                            onClick={() => setViewMode('charts')}
+                            className={`px-3 py-1 text-xs font-medium transition-colors ${
+                                viewMode === 'charts'
+                                    ? 'bg-gray-600 text-white'
+                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                        >
+                            Charts View
+                        </button>
+                    </div>
+                    <div className="flex space-x-4">
+                        <label className="flex items-center space-x-2">
+                            <input
+                                type="checkbox"
+                                checked={showAccountNumbers}
+                                onChange={(e) => setShowAccountNumbers(e.target.checked)}
+                                className="border-gray-300 text-gray-600 focus:border-gray-300 focus:ring focus:ring-gray-200 focus:ring-opacity-50"
+                            />
+                            <span className="text-xs text-gray-600">Show account numbers</span>
+                        </label>
+                        <button
+                            onClick={handleDownload}
+                            className="px-3 py-1 text-xs bg-gray-600 text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors flex items-center space-x-1"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                            <span>Download CSV</span>
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* AI Analysis Panel */}
+            {reportData && (
+                <div className="mb-6">
+                    <AIAnalysisPanel reportData={reportData} reportType="loss_allowance" />
+                </div>
+            )}
+
+            {/* Search Form */}
             <div className="mb-4">
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
                     {/* Start Date Section */}
@@ -164,6 +425,8 @@ function LossAllowanceReport() {
                             className="w-full px-2 py-1 text-xs border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none transition-colors"
                         />
                     </div>
+
+                    {/* Start Run Key Section */}
                     <div className="space-y-1">
                         <label className="block text-xs font-medium text-gray-700">Start Run Key</label>
                         <input
@@ -185,6 +448,8 @@ function LossAllowanceReport() {
                             className="w-full px-2 py-1 text-xs border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none transition-colors"
                         />
                     </div>
+
+                    {/* End Run Key Section */}
                     <div className="space-y-1">
                         <label className="block text-xs font-medium text-gray-700">End Run Key</label>
                         <input
@@ -211,30 +476,176 @@ function LossAllowanceReport() {
                 </div>
             </div>
 
-            {/* Table Controls */}
-            {reportData && (
-                <div className="flex justify-end space-x-4 mb-4">
-                    <label className="flex items-center space-x-2">
-                        <input
-                            type="checkbox"
-                            checked={showAccountNumbers}
-                            onChange={(e) => setShowAccountNumbers(e.target.checked)}
-                            className="border-gray-300 text-gray-600 focus:border-gray-300 focus:ring focus:ring-gray-200 focus:ring-opacity-50"
-                        />
-                        <span className="text-xs text-gray-600">Show account numbers</span>
-                    </label>
-                    <button
-                        onClick={handleDownload}
-                        className="px-3 py-1 text-xs bg-gray-600 text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors flex items-center space-x-1"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                        <span>Download CSV</span>
-                    </button>
+            {/* Charts View */}
+            {reportData && viewMode === 'charts' && (
+                <div className="space-y-6 mb-6">
+                    {/* Stage Balance Comparison */}
+                    <div className="bg-white border border-gray-200 p-4">
+                        <h3 className="text-sm font-bold text-gray-800 mb-4">Stage Balance Comparison</h3>
+                        <div className="h-64">
+                            <Bar
+                                data={getStageBalanceChartData()}
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: {
+                                            position: 'top',
+                                        },
+                                        tooltip: {
+                                            callbacks: {
+                                                label: function(context) {
+                                                    return `${context.dataset.label}: ${formatCurrency(context.parsed.y)}`;
+                                                }
+                                            }
+                                        }
+                                    },
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            ticks: {
+                                                callback: function(value) {
+                                                    return formatCurrency(value);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Transfer Analysis */}
+                    <div className="bg-white border border-gray-200 p-4">
+                        <h3 className="text-sm font-bold text-gray-800 mb-4">Stage Transfers Analysis</h3>
+                        <div className="h-64">
+                            <Bar
+                                data={getTransferChartData()}
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: {
+                                            display: false
+                                        },
+                                        tooltip: {
+                                            callbacks: {
+                                                label: function(context) {
+                                                    return `Amount: ${formatCurrency(context.parsed.y)}`;
+                                                }
+                                            }
+                                        }
+                                    },
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            ticks: {
+                                                callback: function(value) {
+                                                    return formatCurrency(value);
+                                                }
+                                            }
+                                        },
+                                        x: {
+                                            ticks: {
+                                                maxRotation: 45
+                                            }
+                                        }
+                                    }
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* ECL Movement Flow */}
+                    <div className="bg-white border border-gray-200 p-4">
+                        <h3 className="text-sm font-bold text-gray-800 mb-4">ECL Movement Flow</h3>
+                        <div className="h-64">
+                            <Line
+                                data={getECLMovementChartData()}
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: {
+                                            display: false
+                                        },
+                                        tooltip: {
+                                            callbacks: {
+                                                label: function(context) {
+                                                    return `Amount: ${formatCurrency(context.parsed.y)}`;
+                                                }
+                                            }
+                                        }
+                                    },
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            ticks: {
+                                                callback: function(value) {
+                                                    return formatCurrency(value);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Stage Distribution */}
+                    <div className="bg-white border border-gray-200 p-4">
+                        <h3 className="text-sm font-bold text-gray-800 mb-4">Opening vs Closing Balance</h3>
+                        <div className="h-64">
+                            <Pie
+                                data={getStageDistributionData()}
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: {
+                                            position: 'bottom',
+                                        },
+                                        tooltip: {
+                                            callbacks: {
+                                                label: function(context) {
+                                                    return `${context.label}: ${formatCurrency(context.parsed)}`;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }}
+                            />
+                        </div>
+                    </div>
                 </div>
             )}
 
+            {/* Table View */}
+            {reportData && viewMode === 'table' && (
+                <div className="mb-4">
+                    {/* PD Term Structure Filter */}
+                    {reportData.segments && (
+                        <div className="mb-4">
+                            <div className="flex items-center space-x-4">
+                                <label className="text-xs font-medium text-gray-700">Filter by PD Term Structure:</label>
+                                <select
+                                    value={selectedSegment}
+                                    onChange={(e) => setSelectedSegment(e.target.value)}
+                                    className="px-2 py-1 text-xs border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 focus:outline-none transition-colors"
+                                >
+                                    <option value="All">All Term Structures</option>
+                                    {reportData.segments.map(segment => (
+                                        <option key={segment} value={segment}>{segment}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Table Content */}
+            {reportData && viewMode === 'table' && (
             <div className="overflow-x-auto border border-gray-200">
                 {error && (
                     <div className="p-3 text-red-700 bg-red-100 mb-3 flex items-center text-xs">
@@ -512,6 +923,7 @@ function LossAllowanceReport() {
                     </div>
                 )}
             </div>
+            )}
         </div>
     );
 }

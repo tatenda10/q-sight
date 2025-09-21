@@ -30,8 +30,10 @@ const pdDocumentationRoutes = require('./routes/pdDocumentation');
 const EclRunRoutes = require('./routes/ecl/ECLRunRoutes.js');
 const ECLAnalysisRoutes = require('./routes/ecl/EclAnalysisRoutes.js');
 const termStructureReportRoutes = require('./routes/reports/termStructureReport.js');
+const pdComparisonRoutes = require('./routes/reports/PDComparisonRoutes.js');
 const dashboardRoutes = require('./routes/dashboard/DashboardRoutes.js');
 const pitpdRoutes = require('./routes/pitpdRoutes');
+const aiRoutes = require('./routes/aiRoutes.js');
 
 const app = express()
 
@@ -90,8 +92,10 @@ app.use('/api/pd-documentation', pdDocumentationRoutes)
 app.use('/api/ecl/', EclRunRoutes)
 app.use('/api/ecl/analysis', ECLAnalysisRoutes)
 app.use('/api/term-structure-report', termStructureReportRoutes)
+app.use('/api/reports', pdComparisonRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/pitpd', pitpdRoutes)
+app.use('/api/ai', aiRoutes)
 
 // Error handling middleware
 app.use((err, req, res, next) => {

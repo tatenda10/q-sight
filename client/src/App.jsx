@@ -35,7 +35,7 @@ import CreateDocumentation from './pages/pd config/PdDocumentation';
 //lgd config
 import LGDConfig from './pages/lgd config/LGDConfig';
 import LGDMethodolody from './pages/lgd config/LGDMethodolody';
-import LGDDocumentation from './pages/lgd config/LGDDocumentation';
+import LGDDocumentation from './pages/lgd config/LgdDocumentation';
 
 //ecl calculation
 import ECLCalculation from './pages/ecl calculation/ECLCalculation';

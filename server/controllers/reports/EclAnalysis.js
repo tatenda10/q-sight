@@ -76,8 +76,19 @@ exports.getEclFullAnalysis = async (req, res) => {
         ORDER BY accounts DESC
       `;
       const [bySegment] = await connection.query(segmentSql, params);
-  
-      // 5. Delinquency distribution (bands: 0, 1-30, 31-60, 61-90, 91+)
+
+      // 5. Portfolio breakdown by PD term structure
+      const portfolioSql = `
+        SELECT n_pd_term_structure_name, COUNT(*) AS accounts,
+          ${buildSumSql(MONEY_FIELDS)}
+        FROM fct_reporting_lines
+        ${clause}
+        GROUP BY n_pd_term_structure_name
+        ORDER BY accounts DESC
+      `;
+      const [byPortfolio] = await connection.query(portfolioSql, params);
+
+      // 6. Delinquency distribution (bands: 0, 1-30, 31-60, 61-90, 91+)
       const delinquencySql = `
         SELECT 
           CASE
@@ -107,7 +118,7 @@ exports.getEclFullAnalysis = async (req, res) => {
   
       // 6. Top 10 exposures (by EAD)
       const topExposureSql = `
-        SELECT n_account_number, n_exposure_at_default_ncy, n_lifetime_ecl_ncy, n_stage_descr, n_prod_segment, v_ccy_code
+        SELECT n_account_number, n_partner_name, n_exposure_at_default_ncy, n_lifetime_ecl_ncy, n_stage_descr, n_prod_segment, v_ccy_code
         FROM fct_reporting_lines
         ${clause}
         ORDER BY n_exposure_at_default_ncy DESC
@@ -135,6 +146,7 @@ exports.getEclFullAnalysis = async (req, res) => {
         byCurrency,
         byStage,
         bySegment,
+        byPortfolio,
         byDelinquency,
         topExposures,
         grandTotal

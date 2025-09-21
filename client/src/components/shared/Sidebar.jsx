@@ -141,6 +141,10 @@ const Sidebar = ({ open, setOpen }) => {
               path: "/lgd-config",
               label: "LGD Configuration",
             },
+            {
+              path: "/lgd-methodology",
+              label: "LGD Methodology",
+            },
           ],
         },
       ],

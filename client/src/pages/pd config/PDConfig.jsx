@@ -203,20 +203,20 @@ function PDConfig() {
                       <tr>
                         {activeTab === 'termStructure' ? (
                           <>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700  tracking-wider">ID</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700  tracking-wider">Product Segment</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700  tracking-wider">Product Type</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700  tracking-wider">Frequency</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700  tracking-wider">Type</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700  tracking-wider">MIS Date</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700  tracking-wider">Actions</th>
+                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">ID</th>
+                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">Product Segment</th>
+                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">Product Type</th>
+                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">Frequency</th>
+                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">Type</th>
+                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">MIS Date</th>
+                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">Actions</th>
                           </>
                         ) : (
                           <>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Structure ID</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Risk Basis</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">PD %</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
+                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Structure ID</th>
+                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Risk Basis</th>
+                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">PD %</th>
+                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
                           </>
                         )}
                       </tr>
@@ -225,14 +225,14 @@ function PDConfig() {
                       {activeTab === 'termStructure' ? (
                         termStructures.map((structure) => (
                           <tr key={structure.v_pd_term_structure_id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-900">{structure.v_pd_term_structure_id}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-900">{structure.v_prod_segment}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-900">{structure.v_prod_type}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-900">{structure.v_pd_term_frequency_unit}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-900">{structure.v_pd_term_structure_type}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-900">{structure.fic_mis_date}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                              <div className="flex space-x-2">
+                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.v_pd_term_structure_id}</td>
+                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.v_prod_segment}</td>
+                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.v_prod_type}</td>
+                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.v_pd_term_frequency_unit}</td>
+                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.v_pd_term_structure_type}</td>
+                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.fic_mis_date}</td>
+                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500">
+                              <div className="flex space-x-1">
                                 <button className="text-blue-600 hover:text-blue-900">
                                   <FaEdit />
                                 </button>
@@ -246,11 +246,11 @@ function PDConfig() {
                       ) : (
                         termStructureDetails.map((detail) => (
                           <tr key={detail.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-900">{detail.v_pd_term_structure_id}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-900">{detail.v_credit_risk_basis_cd}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-900">{detail.n_pd_percent}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                              <div className="flex space-x-2">
+                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{detail.v_pd_term_structure_id}</td>
+                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{detail.v_credit_risk_basis_cd}</td>
+                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{detail.n_pd_percent}</td>
+                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500">
+                              <div className="flex space-x-1">
                                 <button className="text-blue-600 hover:text-blue-900">
                                   <FaEdit />
                                 </button>

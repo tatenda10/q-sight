@@ -12,6 +12,8 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import AIAnalysisPanel from '../ai/AIAnalysisPanel';
+import AIChat from '../ai/AIChat';
 
 Chart.register(
   CategoryScale,
@@ -29,6 +31,7 @@ function ECLAnalsyisReport() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [viewMode, setViewMode] = useState("table"); // 'table' or 'chart'
+  const [selectedSegment, setSelectedSegment] = useState("");
 
   // Fetch analysis
   const fetchAnalysis = () => {
@@ -60,77 +63,117 @@ function ECLAnalsyisReport() {
           maximumFractionDigits: decimals,
         });
 
+  // Filter data by selected segment
+  const filterDataBySegment = (originalData) => {
+    if (!originalData || !selectedSegment) return originalData;
+    
+    const filteredData = { ...originalData };
+    
+    // Filter bySegment data
+    if (filteredData.bySegment) {
+      filteredData.bySegment = filteredData.bySegment.filter(
+        segment => segment.n_prod_segment === selectedSegment
+      );
+    }
+    
+    return filteredData;
+  };
+
+  // Get unique segments for dropdown
+  const getUniqueSegments = () => {
+    if (!data?.bySegment) return [];
+    return [...new Set(data.bySegment.map(segment => segment.n_prod_segment))].sort();
+  };
+
+  // Get filtered data
+  const getFilteredData = () => {
+    return filterDataBySegment(data);
+  };
+
   // Chart data helpers
-  const currencyChartData = data && {
-    labels: data.byCurrency.map((row) => row.v_ccy_code),
+  const filteredData = getFilteredData();
+  
+  const currencyChartData = filteredData && {
+    labels: filteredData.byCurrency?.map((row) => row.v_ccy_code) || [],
     datasets: [
       {
         label: "EAD",
-        data: data.byCurrency.map((row) => row.n_exposure_at_default_ncy),
+        data: filteredData.byCurrency?.map((row) => row.n_exposure_at_default_ncy) || [],
         backgroundColor: "#3b82f6",
       },
       {
         label: "Lifetime ECL",
-        data: data.byCurrency.map((row) => row.n_lifetime_ecl_ncy),
+        data: filteredData.byCurrency?.map((row) => row.n_lifetime_ecl_ncy) || [],
         backgroundColor: "#22c55e",
       },
       {
         label: "12M ECL",
-        data: data.byCurrency.map((row) => row.n_12m_ecl_ncy),
+        data: filteredData.byCurrency?.map((row) => row.n_12m_ecl_ncy) || [],
         backgroundColor: "#eab308",
       },
     ],
   };
 
-  const stageChartData = data && {
-    labels: data.byStage.map((row) => row.n_stage_descr),
+  const stageChartData = filteredData && {
+    labels: filteredData.byStage?.map((row) => row.n_stage_descr) || [],
     datasets: [
       {
         label: "Accounts",
-        data: data.byStage.map((row) => row.accounts),
+        data: filteredData.byStage?.map((row) => row.accounts) || [],
         backgroundColor: "#64748b",
       },
       {
         label: "EAD",
-        data: data.byStage.map((row) => row.n_exposure_at_default_ncy),
+        data: filteredData.byStage?.map((row) => row.n_exposure_at_default_ncy) || [],
         backgroundColor: "#3b82f6",
       },
     ],
   };
 
-  const segmentChartData = data && {
-    labels: data.bySegment.map((row) => row.n_prod_segment),
+  const segmentChartData = filteredData && {
+    labels: filteredData.bySegment?.map((row) => row.n_prod_segment) || [],
     datasets: [
       {
         label: "EAD",
-        data: data.bySegment.map((row) => row.n_exposure_at_default_ncy),
+        data: filteredData.bySegment?.map((row) => row.n_exposure_at_default_ncy) || [],
         backgroundColor: "#38bdf8",
       },
     ],
   };
 
-  const delinquencyChartData = data && {
-    labels: data.byDelinquency.map((row) => row.delinquency_band),
+  const portfolioChartData = data && {
+    labels: data.byPortfolio?.map((row) => row.n_pd_term_structure_name) || [],
+    datasets: [
+      {
+        label: "EAD",
+        data: data.byPortfolio?.map((row) => row.n_exposure_at_default_ncy) || [],
+        backgroundColor: "#8b5cf6",
+      },
+    ],
+  };
+
+  const delinquencyChartData = filteredData && {
+    labels: filteredData.byDelinquency?.map((row) => row.delinquency_band) || [],
     datasets: [
       {
         label: "Accounts",
-        data: data.byDelinquency.map((row) => row.accounts),
+        data: filteredData.byDelinquency?.map((row) => row.accounts) || [],
         backgroundColor: "#f472b6",
       },
       {
         label: "EAD",
-        data: data.byDelinquency.map((row) => row.n_exposure_at_default_ncy),
+        data: filteredData.byDelinquency?.map((row) => row.n_exposure_at_default_ncy) || [],
         backgroundColor: "#818cf8",
       },
     ],
   };
 
-  const topExposureChartData = data && {
-    labels: data.topExposures.map((row) => row.n_account_number),
+  const topExposureChartData = filteredData && {
+    labels: filteredData.topExposures?.map((row) => `${row.n_account_number} - ${row.n_partner_name || 'N/A'}`) || [],
     datasets: [
       {
         label: "EAD",
-        data: data.topExposures.map((row) => row.n_exposure_at_default_ncy),
+        data: filteredData.topExposures?.map((row) => row.n_exposure_at_default_ncy) || [],
         backgroundColor: "#f59e42",
       },
     ],
@@ -158,8 +201,19 @@ function ECLAnalsyisReport() {
           />
         </div>
 
-        {/* Right Side - View Mode and Search Button */}
+        {/* Right Side - View Mode, Segment Filter and Search Button */}
         <div className="flex gap-2 items-center">
+          <select
+            className="border border-gray-300 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+            value={selectedSegment}
+            onChange={(e) => setSelectedSegment(e.target.value)}
+          >
+            <option value="">All Segments</option>
+            {getUniqueSegments().map(segment => (
+              <option key={segment} value={segment}>{segment}</option>
+            ))}
+          </select>
+          
           <select
             className="border border-gray-300 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
             value={viewMode}
@@ -224,7 +278,17 @@ function ECLAnalsyisReport() {
 
       {error && <div className="text-red-600 mb-4">{error}</div>}
 
+      {/* AI Chat Component */}
+      {data && <AIChat reportData={data} reportType="ecl_analysis" />}
+
+      {/* AI Analysis Panel */}
       {data && (
+        <div className="mb-6">
+          <AIAnalysisPanel reportData={data} reportType="ecl_analysis" />
+        </div>
+      )}
+
+      {filteredData && (
         <div className="space-y-8">
           {/* Summary Cards */}
       
@@ -258,7 +322,7 @@ function ECLAnalsyisReport() {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 bg-white">
-          {data.byCurrency?.map((row, i) => (
+          {filteredData.byCurrency?.map((row, i) => (
             <tr key={i} className="hover:bg-gray-50 transition-colors">
               <td className="whitespace-nowrap px-4 py-2.5 text-start font-medium text-gray-900">
                 {row.v_ccy_code}
@@ -361,7 +425,7 @@ function ECLAnalsyisReport() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {data.byStage?.map((row, i) => (
+                    {filteredData.byStage?.map((row, i) => (
                       <tr key={i} className="hover:bg-gray-50 transition-colors">
                         <td className="px-4 py-2.5 text-left font-medium text-gray-900">
                           {row.n_stage_descr}
@@ -395,7 +459,7 @@ function ECLAnalsyisReport() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {data.bySegment?.map((row, i) => (
+                    {filteredData.bySegment?.map((row, i) => (
                       <tr key={i} className="hover:bg-gray-50 transition-colors">
                         <td className="px-4 py-2.5 text-left font-medium text-gray-900">
                           {row.n_prod_segment}
@@ -410,6 +474,49 @@ function ECLAnalsyisReport() {
               </div>
             ) : (
               <Bar data={segmentChartData} />
+            )}
+          </div>
+
+          {/* By Portfolio */}
+          <div>
+            <h2 className="text-sm font-semibold mb-3">Breakdown by Portfolio (PD Term Structure)</h2>
+            {viewMode === "table" ? (
+              <div className="overflow-x-auto border border-gray-200 shadow-sm">
+                <table className="min-w-full divide-y divide-gray-200 text-xs">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2.5 text-left font-medium text-gray-700">Portfolio</th>
+                      <th className="px-4 py-2.5 text-left font-medium text-gray-700">Accounts</th>
+                      <th className="px-4 py-2.5 text-left font-medium text-gray-700">EAD</th>
+                      <th className="px-4 py-2.5 text-left font-medium text-gray-700">Lifetime ECL</th>
+                      <th className="px-4 py-2.5 text-left font-medium text-gray-700">12M ECL</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {data.byPortfolio?.map((row, i) => (
+                      <tr key={i} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-2.5 text-left font-medium text-gray-900">
+                          {row.n_pd_term_structure_name}
+                        </td>
+                        <td className="px-4 py-2.5 text-left text-gray-700">
+                          {fmt(row.accounts, 0)}
+                        </td>
+                        <td className="px-4 py-2.5 text-left text-gray-700">
+                          {fmt(row.n_exposure_at_default_ncy)}
+                        </td>
+                        <td className="px-4 py-2.5 text-left text-gray-700">
+                          {fmt(row.n_lifetime_ecl_ncy)}
+                        </td>
+                        <td className="px-4 py-2.5 text-left text-gray-700">
+                          {fmt(row.n_12m_ecl_ncy)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <Bar data={portfolioChartData} />
             )}
           </div>
 
@@ -433,7 +540,7 @@ function ECLAnalsyisReport() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {data.byDelinquency?.map((row, i) => (
+                    {filteredData.byDelinquency?.map((row, i) => (
                       <tr key={i} className="hover:bg-gray-50 transition-colors">
                         <td className="px-4 py-2.5 text-left font-medium text-gray-900">
                           {row.delinquency_band}
@@ -462,18 +569,30 @@ function ECLAnalsyisReport() {
                 <table className="min-w-full divide-y divide-gray-200 text-xs">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-2.5 text-left font-medium text-gray-700">Account</th>
+                      <th className="px-4 py-2.5 text-left font-medium text-gray-700">Account Number</th>
+                      <th className="px-4 py-2.5 text-left font-medium text-gray-700">Account Name</th>
                       <th className="px-4 py-2.5 text-left font-medium text-gray-700">EAD</th>
+                      <th className="px-4 py-2.5 text-left font-medium text-gray-700">Stage</th>
+                      <th className="px-4 py-2.5 text-left font-medium text-gray-700">Segment</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {data.topExposures?.map((row, i) => (
+                    {filteredData.topExposures?.map((row, i) => (
                       <tr key={i} className="hover:bg-gray-50 transition-colors">
                         <td className="px-4 py-2.5 text-left font-medium text-gray-900">
                           {row.n_account_number}
                         </td>
                         <td className="px-4 py-2.5 text-left text-gray-700">
+                          {row.n_partner_name || 'N/A'}
+                        </td>
+                        <td className="px-4 py-2.5 text-left text-gray-700">
                           {fmt(row.n_exposure_at_default_ncy)}
+                        </td>
+                        <td className="px-4 py-2.5 text-left text-gray-700">
+                          {row.n_stage_descr || 'N/A'}
+                        </td>
+                        <td className="px-4 py-2.5 text-left text-gray-700">
+                          {row.n_prod_segment || 'N/A'}
                         </td>
                       </tr>
                     ))}
