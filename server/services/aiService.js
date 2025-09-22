@@ -1290,6 +1290,182 @@ Use clear, professional language without markdown formatting. Focus on actionabl
     }
     return (Number(value) * 100).toFixed(2) + '%';
   }
+
+  async analyzeResultsVisualization(reportData) {
+    try {
+      console.log('Analyzing Results Visualization...');
+      
+      const prompt = this.buildResultsVisualizationPrompt(reportData);
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 2000,
+        temperature: 0.3
+      });
+
+      const cleanedResponse = this.cleanAIResponse(response.choices[0].message.content);
+      
+      const metrics = this.calculateResultsVisualizationMetrics(reportData);
+      const riskAlerts = this.generateResultsVisualizationRiskAlerts(reportData);
+
+      return {
+        success: true,
+        analysis: cleanedResponse,
+        metrics: metrics,
+        riskAlerts: riskAlerts
+      };
+    } catch (error) {
+      console.error('Error analyzing Results Visualization:', error);
+      throw error;
+    }
+  }
+
+  buildResultsVisualizationPrompt(reportData) {
+    const { visualizationType, selectedVintage, heatmapData, survivalData, migrationData, statistics, summary } = reportData;
+    
+    return `You are a credit risk analyst with expertise in vintage analysis and survival analysis for ECL calculations. Analyze the following results visualization data and provide comprehensive insights.
+
+VISUALIZATION TYPE: ${visualizationType}
+SELECTED VINTAGE: ${selectedVintage}
+
+HEATMAP DATA SUMMARY:
+- Total Vintages: ${summary.totalVintages}
+- Selected Vintages: ${summary.selectedVintages}
+- Average Performance: ${summary.averagePerformance.toFixed(2)}%
+
+SURVIVAL ANALYSIS DATA:
+${survivalData.map(d => `- ${d.vintage}: ${d.time}m = ${d.survival.toFixed(3)}`).join('\n')}
+
+MIGRATION FLOW DATA:
+- Current to Delinquent: ${summary.migrationInsights.currentToDelinquent.toFixed(1)}%
+- Recovery Rate (1-30 DPD to Current): ${summary.migrationInsights.recoveryRate.toFixed(1)}%
+
+STATISTICAL OUTPUTS:
+- Model: ${statistics.model}
+- Concordance: ${statistics.concordance}
+- P-Value: ${statistics.pValue}
+- Hazard Ratio: ${statistics.hazardRatio}
+
+Please provide analysis in the following sections:
+
+EXECUTIVE SUMMARY
+Provide a high-level overview of the vintage analysis and survival analysis results, highlighting key findings and trends.
+
+VINTAGE PERFORMANCE ANALYSIS
+Analyze the heatmap data, identifying:
+- Best and worst performing vintages
+- Performance trends over time
+- Age-related performance patterns
+- Risk concentration areas
+
+SURVIVAL ANALYSIS INSIGHTS
+Analyze the survival curves, focusing on:
+- Survival probability trends across vintages
+- Time-to-default patterns
+- Vintage quality comparison
+- Economic cycle impact
+
+MIGRATION PATTERN ANALYSIS
+Analyze the migration flow data, examining:
+- Delinquency progression patterns
+- Recovery rates and effectiveness
+- Risk escalation paths
+- Collection process insights
+
+STATISTICAL MODEL ASSESSMENT
+Evaluate the statistical outputs:
+- Model fit and reliability
+- Significance of findings
+- Risk factor identification
+- Model validation insights
+
+RISK ASSESSMENT
+Identify key risks and concerns:
+- High-risk vintages or time periods
+- Deteriorating trends
+- Concentration risks
+- Early warning indicators
+
+RECOMMENDATIONS
+Provide actionable recommendations:
+- Risk management strategies
+- Portfolio optimization suggestions
+- Model improvement areas
+- Monitoring and alerting recommendations
+
+Use clear, professional language suitable for credit risk professionals. Focus on practical insights that can inform ECL calculations and risk management decisions.`;
+  }
+
+  calculateResultsVisualizationMetrics(reportData) {
+    const { summary, statistics, heatmapData, migrationData } = reportData;
+    
+    // Calculate average PD from survival data (inverse of survival probability)
+    const averageSurvival = reportData.survivalData.length > 0 
+      ? reportData.survivalData.reduce((sum, point) => sum + point.survival, 0) / reportData.survivalData.length
+      : 0;
+    const averagePD = (1 - averageSurvival) * 100; // Convert to percentage
+    
+    // Calculate average LGD (simplified - using migration patterns as proxy)
+    const defaultRate = summary.migrationInsights.currentToDelinquent / 100;
+    const averageLGD = defaultRate * 60; // Assume 60% LGD for defaulted accounts
+    
+    return {
+      totalSegments: summary.totalVintages, // Using vintages as segments for now
+      totalAccounts: summary.totalAccounts || 0,
+      averagePD: averagePD,
+      averageLGD: averageLGD,
+      totalVintages: summary.totalVintages,
+      selectedVintages: summary.selectedVintages,
+      averagePerformance: summary.averagePerformance,
+      migrationRate: summary.migrationInsights.currentToDelinquent,
+      recoveryRate: summary.migrationInsights.recoveryRate,
+      modelConcordance: statistics.concordance,
+      modelPValue: statistics.pValue,
+      hazardRatio: statistics.hazardRatio
+    };
+  }
+
+  generateResultsVisualizationRiskAlerts(reportData) {
+    const { summary, statistics } = reportData;
+    const alerts = [];
+
+    if (summary.averagePerformance > 70) {
+      alerts.push({
+        type: 'warning',
+        message: `High average performance rate of ${summary.averagePerformance.toFixed(1)}% may indicate data quality issues or overly optimistic assumptions`
+      });
+    }
+
+    if (summary.migrationInsights.currentToDelinquent > 20) {
+      alerts.push({
+        type: 'critical',
+        message: `High migration rate from Current to Delinquent (${summary.migrationInsights.currentToDelinquent.toFixed(1)}%) indicates deteriorating portfolio quality`
+      });
+    }
+
+    if (summary.migrationInsights.recoveryRate < 50) {
+      alerts.push({
+        type: 'warning',
+        message: `Low recovery rate (${summary.migrationInsights.recoveryRate.toFixed(1)}%) suggests ineffective collection processes`
+      });
+    }
+
+    if (statistics.pValue > 0.05) {
+      alerts.push({
+        type: 'info',
+        message: `Model p-value of ${statistics.pValue} indicates results may not be statistically significant`
+      });
+    }
+
+    if (statistics.concordance < 0.7) {
+      alerts.push({
+        type: 'warning',
+        message: `Low concordance index (${statistics.concordance}) suggests model may need improvement`
+      });
+    }
+
+    return alerts;
+  }
 }
 
 module.exports = AIService;

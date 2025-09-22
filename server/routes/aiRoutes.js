@@ -45,6 +45,15 @@ router.post('/analyze-pd-comparison', async (req, res) => {
 });
 
 /**
+ * @route   POST /api/ai/analyze-results-visualization
+ * @desc    Analyze Results Visualization with AI
+ * @access  Private
+ */
+router.post('/analyze-results-visualization', async (req, res) => {
+  await aiController.analyzeResultsVisualization(req, res);
+});
+
+/**
  * @route   GET /api/ai/status
  * @desc    Get AI service status and health check
  * @access  Private

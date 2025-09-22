@@ -58,6 +58,10 @@ const Sidebar = ({ open, setOpen }) => {
           path: "/ecl-results",
           label: "ECL Results",
         },
+        {
+          path: "/vintage-analysis",
+          label: "Vintage Analysis",
+        },
       ],
     },
     {
@@ -131,6 +135,19 @@ const Sidebar = ({ open, setOpen }) => {
             {
               path: "/pd-methodology",
               label: "PD Methodology",
+            },
+            {
+              path: "/pd-backtesting",
+              label: "PD Backtesting",
+            },
+          ],
+        },
+        {
+          subheading: "Macro-Economic",
+          subitems: [
+            {
+              path: "/macro-economic-config",
+              label: "Macro-Economic Config",
             },
           ],
         },

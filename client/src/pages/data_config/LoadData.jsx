@@ -15,7 +15,9 @@ function LoadData() {
     { id: 'INVESTMENTS', label: 'Investments' },
     { id: 'PARTY_RATINGS', label: 'Party Ratings' },
     { id: 'PARTY_MASTER', label: 'Party Master', endpoint: '/customer-info' },
-    { id: 'EXCHANGE_RATES', label: 'Exchange Rates' }
+    { id: 'EXCHANGE_RATES', label: 'Exchange Rates' },
+    { id: 'VINTAGE_PERFORMANCE', label: 'Vintage Performance Data' },
+    { id: 'ACCOUNT_LIFECYCLE', label: 'Account Lifecycle Data' }
   ];
 
   const handleFileChange = (event) => {
@@ -62,6 +64,12 @@ function LoadData() {
               console.log('Upload Progress:', percentCompleted);
             },
           });
+          break;
+
+        case 'VINTAGE_PERFORMANCE':
+        case 'ACCOUNT_LIFECYCLE':
+          // TODO: Implement vintage analysis upload endpoints
+          response = { data: { count: 0, message: 'Vintage analysis upload not yet implemented' } };
           break;
 
         default:
@@ -275,6 +283,7 @@ function LoadData() {
           ))}
         </div>
       </div>
+
     </div>
   );
 }

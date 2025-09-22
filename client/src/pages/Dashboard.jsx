@@ -3,12 +3,13 @@ import axios from 'axios';
 import API_URL from '../utils/Api';
 
 // Import components
-import QuickActions from '../components/dashboard/QuickActions';
 import ECLTrend from '../components/dashboard/ECLTrend';
 import PortfolioSummary from '../components/dashboard/PortfolioSummary';
-import ProductSegmentation from '../components/dashboard/ProductSegmentation';
-import ECLByProduct from '../components/dashboard/ECLByProduct';
-import LossAllowanceReport from '../components/dashboard/LossAllowanceReport';
+import ECLByProductType from '../components/dashboard/ECLByProductType';
+import WriteoffsRecoveriesTrend from '../components/dashboard/WriteoffsRecoveriesTrend';
+import PDBacktestingChart from '../components/dashboard/PDBacktestingChart';
+import ECLImpactOnPnL from '../components/dashboard/ECLImpactOnPnL';
+import ModelGovernanceCompliance from '../components/dashboard/ModelGovernanceCompliance';
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -17,7 +18,6 @@ const Dashboard = () => {
   const [portfolioSummary, setPortfolioSummary] = useState(null);
   const [productSegmentation, setProductSegmentation] = useState([]);
   const [eclTrends, setEclTrends] = useState([]);
-  const [lossAllowanceReport, setLossAllowanceReport] = useState(null);
 
   useEffect(() => {
     fetchDashboardData();
@@ -86,14 +86,6 @@ const Dashboard = () => {
         });
         setProductSegmentation(segmentationResponse.data.data);
 
-        // Get Loss Allowance Report
-        const lossAllowanceResponse = await axios.get(`${API_URL}/dashboard/loss-allowance-report`, {
-          params: {
-            run_key: latestRunData.run_key,
-            date: latestRunData.date
-          }
-        });
-        setLossAllowanceReport(lossAllowanceResponse.data.data);
       }
 
       setLoading(false);
@@ -138,33 +130,38 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <QuickActions />
 
       {/* Portfolio Summary - Full Width */}
       <div className="mb-6">
         <PortfolioSummary portfolioSummary={portfolioSummary} />
       </div>
 
-      {/* ECL Trend */}
-      <div className="mb-6">
+      {/* ECL by Product Type and ECL Trend */}
+      <div className="grid grid-cols-2 gap-6 mb-6">
+        <ECLByProductType />
         <ECLTrend eclTrends={eclTrends} />
       </div>
 
-      {/* Product Segmentation and ECL by Product */}
-      <div className="grid grid-cols-2 gap-6 mb-6">
-        <ProductSegmentation 
-          productSegmentation={productSegmentation}
-          portfolioSummary={portfolioSummary}
-        />
-        <ECLByProduct 
-          productSegmentation={productSegmentation}
-          portfolioSummary={portfolioSummary}
-        />
+      {/* Write-offs vs Recoveries Trend */}
+      <div className="mb-6">
+        <WriteoffsRecoveriesTrend />
       </div>
 
-      {/* Loss Allowance Report */}
-      <LossAllowanceReport lossAllowanceReport={lossAllowanceReport} />
+      {/* Back-testing of PDs vs Actual Defaults */}
+      <div className="mb-6">
+        <PDBacktestingChart />
+      </div>
+
+      {/* ECL Impact on Profit & Loss */}
+      <div className="mb-6">
+        <ECLImpactOnPnL />
+      </div>
+
+
+      {/* Model Governance & Compliance */}
+      <div className="mb-6">
+        <ModelGovernanceCompliance />
+      </div>
     </div>
   );
 };

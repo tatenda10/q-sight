@@ -3,6 +3,7 @@ import axios from "axios";
 import API_URL from "../../utils/Api";
 import moment from "moment";
 import { FixedSizeList as List } from "react-window";
+import ResultsVisualization from "../../components/ecl/ResultsVisualization";
 
 function ViewResults() {
   const todayStr = moment().format("YYYY-MM-DD");
@@ -12,6 +13,7 @@ function ViewResults() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [columns, setColumns] = useState([]);
+  const [activeTab, setActiveTab] = useState('data');
 
   const fetchResults = useCallback(() => {
     if (!ficMisDate || !nRunKey) {
@@ -262,7 +264,36 @@ function ViewResults() {
 
       <hr className="border-gray-200 mb-4" />
 
-      {loading ? (
+      {/* Tabs */}
+      <div className="border-b border-gray-200 mb-4">
+        <nav className="-mb-px flex space-x-6">
+          <button
+            className={`py-2 px-1 text-xs font-medium border-b-2 ${
+              activeTab === 'data'
+                ? 'border-gray-600 text-gray-900'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+            onClick={() => setActiveTab('data')}
+          >
+            Data Table
+          </button>
+          <button
+            className={`py-2 px-1 text-xs font-medium border-b-2 ${
+              activeTab === 'visualization'
+                ? 'border-gray-600 text-gray-900'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+            onClick={() => setActiveTab('visualization')}
+          >
+            Results Visualization
+          </button>
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'data' && (
+        <>
+          {loading ? (
         <div className="text-gray-600 flex items-center justify-center h-32">
           <svg
             className="animate-spin h-6 w-6 text-blue-500"
@@ -327,6 +358,12 @@ function ViewResults() {
             </div>
           )}
         </div>
+      )}
+        </>
+      )}
+
+      {activeTab === 'visualization' && (
+        <ResultsVisualization />
       )}
     </div>
   );

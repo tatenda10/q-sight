@@ -6,6 +6,7 @@ import API_URL from '../../utils/Api';
 import SuccessModal from '../../components/shared/SuccessModal';
 import ErrorModal from '../../components/shared/ErrorModal';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
+import PDBacktesting from './PDBacktesting';
 
 function PDConfig() {
   // State for active tab
@@ -175,123 +176,141 @@ function PDConfig() {
             >
               PD Term Structure Details
             </button>
+            <button
+              className={`${
+                activeTab === 'backtesting'
+                  ? 'border-gray-600 text-gray-900'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              } whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-xs`}
+              onClick={() => setActiveTab('backtesting')}
+            >
+              PD Backtesting
+            </button>
           </nav>
         </div>
 
-        {/* Add Button */}
-        <div className="mb-4 flex justify-end">
-          <button
-            onClick={() => activeTab === 'termStructure' ? setShowTermStructureModal(true) : setShowDetailsModal(true)}
-            className="bg-gray-600 text-white px-4 py-2 text-xs hover:bg-gray-700 flex items-center gap-2"
-          >
-            <FaPlus /> Add New {activeTab === 'termStructure' ? 'Term Structure' : 'Term Structure Detail'}
-          </button>
-        </div>
+        {/* Add Button - Only show for original tabs */}
+        {(activeTab === 'termStructure' || activeTab === 'termStructureDetails') && (
+          <div className="mb-4 flex justify-end">
+            <button
+              onClick={() => activeTab === 'termStructure' ? setShowTermStructureModal(true) : setShowDetailsModal(true)}
+              className="bg-gray-600 text-white px-4 py-2 text-xs hover:bg-gray-700 flex items-center gap-2"
+            >
+              <FaPlus /> Add New {activeTab === 'termStructure' ? 'Term Structure' : 'Term Structure Detail'}
+            </button>
+          </div>
+        )}
 
         {/* Content Area */}
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex-1 bg-white border border-gray-200 flex flex-col overflow-hidden">
-            {isLoading ? (
-              <div className="flex items-center justify-center h-full">
-                <LoadingSpinner />
-              </div>
+            {activeTab === 'backtesting' ? (
+              <PDBacktesting />
             ) : (
-              <div className="overflow-x-auto">
-                <div className="overflow-y-auto" style={{ maxHeight: '400px' }}>
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-200">
-                      <tr>
-                        {activeTab === 'termStructure' ? (
-                          <>
-                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">ID</th>
-                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">Product Segment</th>
-                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">Product Type</th>
-                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">Frequency</th>
-                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">Type</th>
-                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">MIS Date</th>
-                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">Actions</th>
-                          </>
-                        ) : (
-                          <>
-                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Structure ID</th>
-                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Risk Basis</th>
-                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">PD %</th>
-                            <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
-                          </>
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {activeTab === 'termStructure' ? (
-                        termStructures.map((structure) => (
-                          <tr key={structure.v_pd_term_structure_id}>
-                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.v_pd_term_structure_id}</td>
-                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.v_prod_segment}</td>
-                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.v_prod_type}</td>
-                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.v_pd_term_frequency_unit}</td>
-                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.v_pd_term_structure_type}</td>
-                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.fic_mis_date}</td>
-                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500">
-                              <div className="flex space-x-1">
-                                <button className="text-blue-600 hover:text-blue-900">
-                                  <FaEdit />
-                                </button>
-                                <button className="text-red-600 hover:text-red-900">
-                                  <FaTrash />
-                                </button>
-                              </div>
-                            </td>
+              <>
+                {isLoading ? (
+                  <div className="flex items-center justify-center h-full">
+                    <LoadingSpinner />
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <div className="overflow-y-auto" style={{ maxHeight: '400px' }}>
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-200">
+                          <tr>
+                            {activeTab === 'termStructure' ? (
+                              <>
+                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">ID</th>
+                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">Product Segment</th>
+                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">Product Type</th>
+                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">Frequency</th>
+                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">Type</th>
+                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">MIS Date</th>
+                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 tracking-wider">Actions</th>
+                              </>
+                            ) : (
+                              <>
+                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Structure ID</th>
+                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Risk Basis</th>
+                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">PD %</th>
+                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
+                              </>
+                            )}
                           </tr>
-                        ))
-                      ) : (
-                        termStructureDetails.map((detail) => (
-                          <tr key={detail.id}>
-                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{detail.v_pd_term_structure_id}</td>
-                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{detail.v_credit_risk_basis_cd}</td>
-                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{detail.n_pd_percent}</td>
-                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500">
-                              <div className="flex space-x-1">
-                                <button className="text-blue-600 hover:text-blue-900">
-                                  <FaEdit />
-                                </button>
-                                <button className="text-red-600 hover:text-red-900">
-                                  <FaTrash />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {activeTab === 'termStructure' ? (
+                            termStructures.map((structure) => (
+                              <tr key={structure.v_pd_term_structure_id}>
+                                <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.v_pd_term_structure_id}</td>
+                                <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.v_prod_segment}</td>
+                                <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.v_prod_type}</td>
+                                <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.v_pd_term_frequency_unit}</td>
+                                <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.v_pd_term_structure_type}</td>
+                                <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{structure.fic_mis_date}</td>
+                                <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500">
+                                  <div className="flex space-x-1">
+                                    <button className="text-blue-600 hover:text-blue-900">
+                                      <FaEdit />
+                                    </button>
+                                    <button className="text-red-600 hover:text-red-900">
+                                      <FaTrash />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            termStructureDetails.map((detail) => (
+                              <tr key={detail.id}>
+                                <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{detail.v_pd_term_structure_id}</td>
+                                <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{detail.v_credit_risk_basis_cd}</td>
+                                <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">{detail.n_pd_percent}</td>
+                                <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500">
+                                  <div className="flex space-x-1">
+                                    <button className="text-blue-600 hover:text-blue-900">
+                                      <FaEdit />
+                                    </button>
+                                    <button className="text-red-600 hover:text-red-900">
+                                      <FaTrash />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
 
-            {/* Pagination */}
-            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-white">
-              <div className="flex items-center">
-                <span className="text-xs text-gray-700">
-                  Page {currentPage} of {totalPages}
-                </span>
-              </div>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 border text-xs disabled:opacity-50"
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 border text-xs disabled:opacity-50"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
+                {/* Pagination - Only show for original tabs */}
+                <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-white">
+                  <div className="flex items-center">
+                    <span className="text-xs text-gray-700">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="px-3 py-1 border text-xs disabled:opacity-50"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      className="px-3 py-1 border text-xs disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

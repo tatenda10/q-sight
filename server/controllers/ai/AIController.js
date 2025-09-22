@@ -500,6 +500,33 @@ class AIController {
     console.log('PD Comparison data structure validation passed');
     return true;
   }
+
+  /**
+   * Analyze Results Visualization with AI
+   * POST /api/ai/analyze-results-visualization
+   */
+  async analyzeResultsVisualization(req, res) {
+    try {
+      const { reportData } = req.body;
+      
+      if (!reportData) {
+        return res.status(400).json({
+          success: false,
+          message: 'Report data is required'
+        });
+      }
+
+      const result = await this.aiService.analyzeResultsVisualization(reportData);
+      res.json(result);
+    } catch (error) {
+      console.error('Error in analyzeResultsVisualization:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error analyzing Results Visualization',
+        error: error.message
+      });
+    }
+  }
 }
 
 module.exports = AIController;

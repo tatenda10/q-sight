@@ -32,6 +32,10 @@ import PdMethodology from './pages/pd config/PdMethodology';
 import PdDocumentation from './pages/pd config/Documentation';
 import ViewDocumentation from './pages/pd config/ViewDocumentation';
 import CreateDocumentation from './pages/pd config/PdDocumentation';
+import PDBacktesting from './pages/pd config/PDBacktesting';
+
+//macro economic
+import MacroEconomicConfig from './pages/macro economic/MacroEconomicConfig';
 //lgd config
 import LGDConfig from './pages/lgd config/LGDConfig';
 import LGDMethodolody from './pages/lgd config/LGDMethodolody';
@@ -41,6 +45,7 @@ import LGDDocumentation from './pages/lgd config/LgdDocumentation';
 import ECLCalculation from './pages/ecl calculation/ECLCalculation';
 import Configuration from './components/ecl/Configuration';
 import ViewResults from './pages/ecl calculation/ViewResults'
+import VintageAnalysis from './pages/ecl calculation/VintageAnalysis';
 import Reports from './pages/reports/Reports';
 import ECLAnalysis from './pages/ECLAnalysis';
 
@@ -87,6 +92,10 @@ function App() {
             <Route path="/documentation/:id" element={<ViewDocumentation />} />
             <Route path="/create-documentation" element={<CreateDocumentation />} />
             <Route path="/pit-pd-development" element={<PdDevelopment />} />
+            <Route path="/pd-backtesting" element={<PDBacktesting />} />
+            
+            {/* macro economic routes */}
+            <Route path="/macro-economic-config" element={<MacroEconomicConfig />} />
             {/* lgd config routes */}
             <Route path="/lgd-config" element={<LGDConfig />} />
             <Route path="/lgd-methodology" element={<LGDMethodolody />} />
@@ -97,6 +106,7 @@ function App() {
             <Route path="/ecl-configuration" element={<Configuration />} />
             <Route path="/ecl-results" element={<ViewResults />} />
             <Route path="/ecl-analysis" element={<ECLAnalysis />} />
+            <Route path="/vintage-analysis" element={<VintageAnalysis />} />
             {/* reports routes */}
             <Route path="/reports" element={<Reports />} />
             <Route path="/upload-cashflows" element={<UploadCashflows />} />

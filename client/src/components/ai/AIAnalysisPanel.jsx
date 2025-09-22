@@ -31,6 +31,9 @@ const AIAnalysisPanel = ({ reportData, reportType = 'loss_allowance' }) => {
         case 'pd_comparison':
           endpoint = `${API_URL}/ai/analyze-pd-comparison`;
           break;
+        case 'results_visualization':
+          endpoint = `${API_URL}/ai/analyze-results-visualization`;
+          break;
         case 'loss_allowance':
         default:
           endpoint = `${API_URL}/ai/analyze-loss-allowance`;
@@ -45,6 +48,16 @@ const AIAnalysisPanel = ({ reportData, reportType = 'loss_allowance' }) => {
         // Handle different response structures for different report types
         if (reportType === 'pd_comparison') {
           // Parse the AI analysis text into sections
+          const analysisText = response.data.analysis;
+          const sections = parseAnalysisSections(analysisText);
+          
+          setAnalysis({
+            insights: sections,
+            keyMetrics: response.data.metrics,
+            riskAlerts: response.data.riskAlerts
+          });
+        } else if (reportType === 'results_visualization') {
+          // Parse the AI analysis text into sections for results visualization
           const analysisText = response.data.analysis;
           const sections = parseAnalysisSections(analysisText);
           
@@ -165,6 +178,7 @@ const AIAnalysisPanel = ({ reportData, reportType = 'loss_allowance' }) => {
                   reportType === 'pd_comparison' ? 'PD Comparison Report' :
                   reportType === 'ecl_analysis' ? 'ECL Analysis Report' :
                   reportType === 'ifrs_735g' ? 'IFRS 7.35G Report' :
+                  reportType === 'results_visualization' ? 'Results Visualization' :
                   'Loss Allowance Report'
                 }
               </p>
@@ -329,6 +343,38 @@ const AIAnalysisPanel = ({ reportData, reportType = 'loss_allowance' }) => {
                       {analysis.keyMetrics.highVarianceCount || 0}
                     </div>
                       <div className="text-xs text-gray-500 mt-1">&gt;20% Difference</div>
+                  </div>
+                </>
+              ) : reportType === 'results_visualization' ? (
+                // Results Visualization metrics
+                <>
+                  <div className="text-center p-3 bg-gray-50">
+                    <div className="text-xs text-gray-600 mb-1">Total Segments</div>
+                    <div className="text-lg font-bold text-gray-800">
+                      {analysis.keyMetrics.totalSegments || 0}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">Product Segments</div>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50">
+                    <div className="text-xs text-gray-600 mb-1">Total Accounts</div>
+                    <div className="text-lg font-bold text-gray-800">
+                      {(analysis.keyMetrics.totalAccounts || 0).toLocaleString()}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">Portfolio Size</div>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50">
+                    <div className="text-xs text-gray-600 mb-1">Average PD</div>
+                    <div className="text-lg font-bold text-gray-800">
+                      {(analysis.keyMetrics.averagePD || 0).toFixed(2)}%
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">Probability of Default</div>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50">
+                    <div className="text-xs text-gray-600 mb-1">Average LGD</div>
+                    <div className="text-lg font-bold text-gray-800">
+                      {(analysis.keyMetrics.averageLGD || 0).toFixed(2)}%
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">Loss Given Default</div>
                   </div>
                 </>
               ) : (
