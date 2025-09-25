@@ -51,6 +51,7 @@ import ECLAnalysis from './pages/ECLAnalysis';
 
 import UploadCashflows from './pages/cashflows/UploadCashflows';
 import PdDevelopment from './pages/pd development/PdDevelopment';
+import LoanBookDashboard from './pages/LoanBookDashboard';
 
 function App() {
   return (
@@ -110,6 +111,9 @@ function App() {
             {/* reports routes */}
             <Route path="/reports" element={<Reports />} />
             <Route path="/upload-cashflows" element={<UploadCashflows />} />
+            
+            {/* loan book dashboard route */}
+            <Route path="/loan-book-dashboard" element={<LoanBookDashboard />} />
           </Route>
 
           {/* Redirect root to dashboard */}

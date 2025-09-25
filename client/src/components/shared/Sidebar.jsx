@@ -21,7 +21,8 @@ import {
   faChartBar,
   faCog as faSettings,
   faChevronDown,
-  faChevronRight
+  faChevronRight,
+  faBookOpen
 } from '@fortawesome/free-solid-svg-icons';
 
 const Sidebar = ({ open, setOpen }) => {
@@ -265,6 +266,26 @@ const Sidebar = ({ open, setOpen }) => {
                         </NavLink>
                       </li>
 
+                      {/* Loan Book Dashboard Link */}
+                      <li>
+                        <NavLink
+                          to="/loan-book-dashboard"
+                          className={({ isActive }) =>
+                            `group flex gap-x-3 rounded-md p-2 text-xs leading-5 font-medium border-b border-gray-200/30 ${
+                              isActive
+                                ? 'bg-gray-50 text-blue-600'
+                                : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                            }`
+                          }
+                          onClick={() => setOpen(false)}
+                        >
+                          <div className="h-5 w-5 shrink-0 text-gray-600 flex items-center justify-center">
+                            <FontAwesomeIcon icon={faBookOpen} className="text-sm" />
+                          </div>
+                          Loan Book Dashboard
+                        </NavLink>
+                      </li>
+
                       {/* Menu Sections */}
         {menuStructure.map((section, index) => (
                         <li key={index}>
@@ -428,6 +449,25 @@ const Sidebar = ({ open, setOpen }) => {
                         <FontAwesomeIcon icon={faChartBar} className="text-sm" />
                       </div>
                       Reports
+                    </NavLink>
+                  </li>
+
+                  {/* Loan Book Dashboard Link */}
+                  <li>
+                    <NavLink
+                      to="/loan-book-dashboard"
+                      className={({ isActive }) =>
+                        `group flex gap-x-3 rounded-md p-2 text-xs leading-5 font-medium border-b border-gray-200/30 ${
+                          isActive
+                            ? 'bg-gray-50 text-blue-600'
+                            : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                        }`
+                      }
+                    >
+                      <div className="h-5 w-5 shrink-0 text-gray-600 flex items-center justify-center">
+                        <FontAwesomeIcon icon={faBookOpen} className="text-sm" />
+                      </div>
+                      Loan Book Dashboard
                     </NavLink>
                   </li>
 
