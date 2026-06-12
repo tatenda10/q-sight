@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from '../../contexts/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import sidebarLogo from '../../assets/sidebalogo.png';
 import { 
   faTachometerAlt, 
   faChartLine, 
@@ -208,16 +209,13 @@ const Sidebar = ({ open, setOpen }) => {
       {/* Header */}
               <div className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200/50">
                 <div className="flex items-center gap-2">
-                  <div className="h-5 w-5 rounded-lg bg-blue-600 flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">I</span>
-                  </div>
-                  <h1 className="text-sm font-bold text-gray-900">IFRS9</h1>
+                  <img src={sidebarLogo} alt="ZB Bank" className="h-8 w-auto object-contain" />
                 </div>
         <button
                   onClick={() => setOpen(false)}
                   className="p-1 rounded-md hover:bg-gray-300"
                 >
-                  <span className="text-gray-600 text-lg font-bold">×</span>
+                  <span className="text-gray-600 text-lg font-bold">Ã—</span>
         </button>
       </div>
 
@@ -233,8 +231,8 @@ const Sidebar = ({ open, setOpen }) => {
                           className={({ isActive }) =>
                             `group flex gap-x-3 rounded-md p-2 text-xs leading-5 font-medium border-b border-gray-200/30 ${
                               isActive
-                                ? 'bg-gray-50 text-blue-600'
-                                : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                                ? 'bg-gray-50 text-green-700'
+                                : 'text-gray-700 hover:text-green-700 hover:bg-gray-50'
                             }`
                           }
                           onClick={() => setOpen(false)}
@@ -253,8 +251,8 @@ const Sidebar = ({ open, setOpen }) => {
                           className={({ isActive }) =>
                             `group flex gap-x-3 rounded-md p-2 text-xs leading-5 font-medium border-b border-gray-200/30 ${
                               isActive
-                                ? 'bg-gray-50 text-blue-600'
-                                : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                                ? 'bg-gray-50 text-green-700'
+                                : 'text-gray-700 hover:text-green-700 hover:bg-gray-50'
                             }`
                           }
                           onClick={() => setOpen(false)}
@@ -273,8 +271,8 @@ const Sidebar = ({ open, setOpen }) => {
                           className={({ isActive }) =>
                             `group flex gap-x-3 rounded-md p-2 text-xs leading-5 font-medium border-b border-gray-200/30 ${
                               isActive
-                                ? 'bg-gray-50 text-blue-600'
-                                : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                                ? 'bg-gray-50 text-green-700'
+                                : 'text-gray-700 hover:text-green-700 hover:bg-gray-50'
                             }`
                           }
                           onClick={() => setOpen(false)}
@@ -320,8 +318,8 @@ const Sidebar = ({ open, setOpen }) => {
                                                 className={({ isActive }) =>
                                                   `group flex gap-x-3 rounded-md p-2 text-xs leading-5 font-medium ${
                                                     isActive
-                                                      ? 'bg-gray-50 text-blue-600'
-                                                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                                                      ? 'bg-gray-50 text-green-700'
+                                                      : 'text-gray-700 hover:text-green-700 hover:bg-gray-50'
                                                   }`
                                                 }
                                                 onClick={() => setOpen(false)}
@@ -342,8 +340,8 @@ const Sidebar = ({ open, setOpen }) => {
                                         className={({ isActive }) =>
                                           `group flex gap-x-3 rounded-md p-2 text-xs leading-5 font-medium ${
                                             isActive
-                                              ? 'bg-gray-50 text-blue-600'
-                                              : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                                              ? 'bg-gray-50 text-green-700'
+                                              : 'text-gray-700 hover:text-green-700 hover:bg-gray-50'
                                           }`
                                         }
                                         onClick={() => setOpen(false)}
@@ -366,8 +364,8 @@ const Sidebar = ({ open, setOpen }) => {
                           className={({ isActive }) =>
                             `group flex gap-x-3 rounded-md p-2 text-xs leading-5 font-medium border-b border-gray-200/30 ${
                               isActive
-                                ? 'bg-gray-50 text-blue-600'
-                                : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                                ? 'bg-gray-50 text-green-700'
+                                : 'text-gray-700 hover:text-green-700 hover:bg-gray-50'
                             }`
                           }
                           onClick={() => setOpen(false)}
@@ -403,10 +401,7 @@ const Sidebar = ({ open, setOpen }) => {
         <div className="flex grow flex-col gap-y-4 overflow-y-auto border-r border-gray-200 bg-gray-200/30 px-4 pb-4 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
           <div className="flex h-14 shrink-0 items-center border-b border-gray-200/50">
             <div className="flex items-center gap-2">
-              <div className="h-5 w-5 rounded-lg bg-blue-600 flex items-center justify-center">
-                <span className="text-white text-xs font-bold">I</span>
-              </div>
-              <h1 className="text-sm font-bold text-gray-900">IFRS9</h1>
+              <img src={sidebarLogo} alt="ZB Bank" className="h-8 w-auto object-contain" />
             </div>
           </div>
           
@@ -421,8 +416,8 @@ const Sidebar = ({ open, setOpen }) => {
                       className={({ isActive }) =>
                         `group flex gap-x-3 rounded-md p-2 text-xs leading-5 font-medium border-b border-gray-200/30 ${
                           isActive
-                            ? 'bg-gray-50 text-blue-600'
-                            : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                            ? 'bg-gray-50 text-green-700'
+                            : 'text-gray-700 hover:text-green-700 hover:bg-gray-50'
                         }`
                       }
                     >
@@ -440,8 +435,8 @@ const Sidebar = ({ open, setOpen }) => {
                       className={({ isActive }) =>
                         `group flex gap-x-3 rounded-md p-2 text-xs leading-5 font-medium border-b border-gray-200/30 ${
                           isActive
-                            ? 'bg-gray-50 text-blue-600'
-                            : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                            ? 'bg-gray-50 text-green-700'
+                            : 'text-gray-700 hover:text-green-700 hover:bg-gray-50'
                         }`
                       }
                     >
@@ -459,8 +454,8 @@ const Sidebar = ({ open, setOpen }) => {
                       className={({ isActive }) =>
                         `group flex gap-x-3 rounded-md p-2 text-xs leading-5 font-medium border-b border-gray-200/30 ${
                           isActive
-                            ? 'bg-gray-50 text-blue-600'
-                            : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                            ? 'bg-gray-50 text-green-700'
+                            : 'text-gray-700 hover:text-green-700 hover:bg-gray-50'
                         }`
                       }
                     >
@@ -505,8 +500,8 @@ const Sidebar = ({ open, setOpen }) => {
                                             className={({ isActive }) =>
                                               `group flex gap-x-3 rounded-md p-2 text-xs leading-5 font-medium ${
                                                 isActive
-                                                  ? 'bg-gray-50 text-blue-600'
-                                                  : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                                                  ? 'bg-gray-50 text-green-700'
+                                                  : 'text-gray-700 hover:text-green-700 hover:bg-gray-50'
                                               }`
                                             }
                                           >
@@ -526,8 +521,8 @@ const Sidebar = ({ open, setOpen }) => {
                                     className={({ isActive }) =>
                                       `group flex gap-x-3 rounded-md p-2 text-xs leading-5 font-medium ${
                                         isActive
-                                          ? 'bg-gray-50 text-blue-600'
-                                          : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                                          ? 'bg-gray-50 text-green-700'
+                                          : 'text-gray-700 hover:text-green-700 hover:bg-gray-50'
                                       }`
                                     }
                                   >
@@ -549,8 +544,8 @@ const Sidebar = ({ open, setOpen }) => {
                       className={({ isActive }) =>
                         `group flex gap-x-3 rounded-md p-2 text-xs leading-5 font-medium border-b border-gray-200/30 ${
                           isActive
-                            ? 'bg-gray-50 text-blue-600'
-                            : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                            ? 'bg-gray-50 text-green-700'
+                            : 'text-gray-700 hover:text-green-700 hover:bg-gray-50'
                         }`
                       }
                     >
