@@ -1,6 +1,5 @@
 import React from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import { Bell, Clock3, LayoutGrid } from 'lucide-react';
 
 const TopBar = () => {
   const location = useLocation();
@@ -57,19 +56,8 @@ const TopBar = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition hover:border-gray-300 hover:text-gray-700">
-            <Clock3 className="h-4 w-4" />
-          </button>
-          <button className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition hover:border-gray-300 hover:text-gray-700">
-            <Bell className="h-4 w-4" />
-          </button>
-          <button className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition hover:border-gray-300 hover:text-gray-700">
-            <LayoutGrid className="h-4 w-4" />
-          </button>
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#10963a] text-sm font-semibold text-white shadow-sm">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#10963a] text-sm font-semibold text-white shadow-sm">
             ZB
-          </div>
         </div>
       </div>
 
