@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, Search, Loader2, Download } from "lucide-react";
 import API_URL from '../../utils/Api';
 import * as XLSX from 'xlsx';
-import AIAnalysisPanel from '../ai/AIAnalysisPanel';
-import AIChat from '../ai/AIChat';
+// import AIAnalysisPanel from '../ai/AIAnalysisPanel';
+// import AIChat from '../ai/AIChat';
 
 function PDComparisonReport() {
   const [selectedDate, setSelectedDate] = useState('2025-05-31');
@@ -123,22 +123,22 @@ function PDComparisonReport() {
 
       {reportData && !error && (
         <>
-          {/* AI Analysis Panel */}
-          <div className="mb-6">
+          {/* AI Analysis Panel - temporarily disabled until credits are available */}
+          {/* <div className="mb-6">
             <AIAnalysisPanel 
               reportData={reportData} 
               reportType="pd_comparison"
               title="PD Comparison Analysis"
             />
-          </div>
+          </div> */}
 
-          {/* AI Chat */}
-          <div className="mb-6">
+          {/* AI Chat - temporarily disabled until credits are available */}
+          {/* <div className="mb-6">
             <AIChat 
               reportData={reportData} 
               reportType="pd_comparison"
             />
-          </div>
+          </div> */}
 
           {/* Summary Statistics */}
           <div className="mb-4 grid grid-cols-2 md:grid-cols-4 gap-4">

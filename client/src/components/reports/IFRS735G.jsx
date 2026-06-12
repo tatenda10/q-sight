@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Calendar, Search, Loader2, Download } from "lucide-react";
 import API_URL from '../../utils/Api';
 import * as XLSX from 'xlsx';
-import AIAnalysisPanel from '../ai/AIAnalysisPanel';
-import AIChat from '../ai/AIChat';
+// import AIAnalysisPanel from '../ai/AIAnalysisPanel';
+// import AIChat from '../ai/AIChat';
 
 export default function IFRS735G() {
   const [reportData, setReportData] = useState(null);
@@ -245,19 +245,19 @@ export default function IFRS735G() {
         </div>
       )}
 
-      {/* AI Analysis Panel */}
-      {reportData && !error && (
+      {/* AI Analysis Panel - temporarily disabled until credits are available */}
+      {/* {reportData && !error && (
         <div className="mb-4">
           <AIAnalysisPanel reportData={reportData} reportType="ifrs_735g" />
         </div>
-      )}
+      )} */}
 
-      {/* AI Chat */}
-      {reportData && !error && (
+      {/* AI Chat - temporarily disabled until credits are available */}
+      {/* {reportData && !error && (
         <div className="mb-4">
           <AIChat reportData={reportData} reportType="ifrs_735g" />
         </div>
-      )}
+      )} */}
 
       {reportData && !error && (
         <div className="overflow-x-auto border border-gray-200">

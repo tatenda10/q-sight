@@ -12,8 +12,8 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import AIAnalysisPanel from '../ai/AIAnalysisPanel';
-import AIChat from '../ai/AIChat';
+// import AIAnalysisPanel from '../ai/AIAnalysisPanel';
+// import AIChat from '../ai/AIChat';
 
 Chart.register(
   CategoryScale,
@@ -278,15 +278,15 @@ function ECLAnalsyisReport() {
 
       {error && <div className="text-red-600 mb-4">{error}</div>}
 
-      {/* AI Chat Component */}
-      {data && <AIChat reportData={data} reportType="ecl_analysis" />}
+      {/* AI Chat Component - temporarily disabled until credits are available */}
+      {/* {data && <AIChat reportData={data} reportType="ecl_analysis" />} */}
 
-      {/* AI Analysis Panel */}
-      {data && (
+      {/* AI Analysis Panel - temporarily disabled until credits are available */}
+      {/* {data && (
         <div className="mb-6">
           <AIAnalysisPanel reportData={data} reportType="ecl_analysis" />
         </div>
-      )}
+      )} */}
 
       {filteredData && (
         <div className="space-y-8">

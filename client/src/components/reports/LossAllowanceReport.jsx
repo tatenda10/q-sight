@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { formatCurrency } from '../../utils/formatters';
 import API_URL from '../../utils/Api';
-import AIAnalysisPanel from '../ai/AIAnalysisPanel';
-import AIChat from '../ai/AIChat';
+// import AIAnalysisPanel from '../ai/AIAnalysisPanel';
+// import AIChat from '../ai/AIChat';
 import { Bar, Line, Pie } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -354,8 +354,8 @@ function LossAllowanceReport() {
 
     return (
         <div className="bg-white p-4">
-            {/* AI Chat Component */}
-            {reportData && <AIChat reportData={reportData} />}
+            {/* AI Chat Component - temporarily disabled until credits are available */}
+            {/* {reportData && <AIChat reportData={reportData} />} */}
             
             {/* View Controls */}
             {reportData && (
@@ -405,12 +405,12 @@ function LossAllowanceReport() {
                 </div>
             )}
 
-            {/* AI Analysis Panel */}
-            {reportData && (
+            {/* AI Analysis Panel - temporarily disabled until credits are available */}
+            {/* {reportData && (
                 <div className="mb-6">
                     <AIAnalysisPanel reportData={reportData} reportType="loss_allowance" />
                 </div>
-            )}
+            )} */}
 
             {/* Search Form */}
             <div className="mb-4">
