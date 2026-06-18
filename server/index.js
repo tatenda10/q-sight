@@ -3,6 +3,7 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const { applyTrustProxy } = require('./config/trustProxy');
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
@@ -11,6 +12,8 @@ const roleRoutes = require('./routes/roles');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+applyTrustProxy(app);
 
 // Middleware
 app.use(cors());

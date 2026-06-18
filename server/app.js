@@ -6,6 +6,7 @@ const specs = require('./config/swagger.js')
 const db = require('./config/database.js')
 const {defaultLimiter } = require('./middleware/rateLimiter')
 const logger = require('./config/logger')
+const { applyTrustProxy } = require('./config/trustProxy')
 
 // Import routes
 const userRoutes = require('./routes/userRoutes.js')
@@ -36,6 +37,8 @@ const pitpdRoutes = require('./routes/pitpdRoutes');
 const aiRoutes = require('./routes/aiRoutes.js');
 
 const app = express()
+
+applyTrustProxy(app, logger)
 
 // Middleware
 app.use(cors())
